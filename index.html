@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FERTILE · M&E Dashboard · SAFE × SBI Foundation</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Space+Mono:wght@400;700&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ── */
+:root{
+  --bg:      #F5F3EE;
+  --bg2:     #EDEAE2;
+  --bg3:     #E4E0D5;
+  --card:    #FFFFFF;
+  --line:    #D8D2C4;
+  --line2:   #C8C0AE;
+  --forest:  #2E5E3E;
+  --forest2: #1E4229;
+  --forest3: #3D7A50;
+  --gold:    #B5751E;
+  --gold2:   #D4973A;
+  --gold-bg: rgba(181,117,30,.08);
+  --amber:   #C4722A;
+  --rust:    #A83030;
+  --sage:    #5A7E62;
+  --sky:     #3A6F94;
+  --ink:     #1C1810;
+  --ink2:    #3D3626;
+  --ink3:    #6B6050;
+  --text-m:  #8A7E6E;
+  --red-bg:  rgba(168,48,48,.08);
+  --r:       4px;
+  --f-d:     'Fraunces',Georgia,serif;
+  --f-b:     'Figtree',sans-serif;
+  --f-m:     'Space Mono',monospace;
+  --sh:      0 2px 12px rgba(28,24,16,.08);
+  --sh2:     0 4px 24px rgba(28,24,16,.13);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--f-b);background:var(--bg);color:var(--ink);font-size:13px;line-height:1.6}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+
+/* ── HEADER ── */
+header{
+  background:var(--forest2);
+  border-bottom:3px solid var(--gold2);
+  padding:0 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;min-height:68px;
+  position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 20px rgba(0,0,0,.18);
+}
+.h-left{display:flex;align-items:center;gap:14px}
+.h-mark{
+  font-family:var(--f-m);font-size:11px;font-weight:700;
+  background:var(--gold2);color:var(--forest2);
+  padding:6px 10px;letter-spacing:.1em;text-transform:uppercase;
+}
+.h-name{font-family:var(--f-d);font-size:22px;font-weight:700;color:#fff;line-height:1.1;letter-spacing:.02em}
+.h-sub{font-family:var(--f-m);font-size:9px;color:rgba(255,255,255,.5);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.h-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.h-pill{border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);font-family:var(--f-m);font-size:9.5px;padding:4px 12px;letter-spacing:.05em}
+.btn-load{
+  background:var(--gold2);color:var(--forest2);border:none;
+  padding:8px 18px;font-family:var(--f-m);font-size:10.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  display:flex;align-items:center;gap:7px;transition:.15s;
+}
+.btn-load:hover{background:#E8AA50}
+.h-fn{font-family:var(--f-m);font-size:9.5px;color:rgba(255,255,255,.4);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type="file"]{display:none}
+
+/* ── APP ── */
+#app{max-width:1720px;margin:0 auto;padding:22px 20px}
+
+/* ── ALERTS ── */
+.alert{padding:11px 16px;font-family:var(--f-m);font-size:10.5px;letter-spacing:.03em;margin-bottom:14px;display:none;border-left:3px solid}
+.a-err{background:var(--red-bg);border-color:var(--rust);color:var(--rust)}
+.a-ok {background:rgba(46,94,62,.1);border-color:var(--forest);color:var(--forest2)}
+.loading{text-align:center;padding:70px;display:none}
+.spin{width:38px;height:38px;border-radius:50%;border:2px solid var(--line2);border-top-color:var(--gold2);animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-lbl{font-family:var(--f-m);font-size:10px;color:var(--text-m);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── WELCOME ── */
+#welcome{
+  background:var(--card);border:1px solid var(--line);
+  padding:72px 48px;text-align:center;margin-top:12px;
+  position:relative;overflow:hidden;box-shadow:var(--sh);
+}
+#welcome::before{
+  content:'FERTILE';font-family:var(--f-d);font-size:200px;
+  color:rgba(46,94,62,.04);position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  white-space:nowrap;pointer-events:none;font-weight:700;
+}
+.wc-tag{display:inline-block;font-family:var(--f-m);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--forest);border:1px solid var(--forest);padding:4px 14px;margin-bottom:22px}
+.wc-h{font-family:var(--f-d);font-size:40px;font-weight:400;color:var(--ink);line-height:1.2;margin-bottom:12px}
+.wc-h em{color:var(--gold);font-style:italic;font-weight:600}
+.wc-p{font-size:14px;color:var(--ink3);max-width:520px;margin:0 auto 32px;line-height:1.8}
+.wc-btn{display:inline-flex;align-items:center;gap:8px;background:var(--forest);color:#fff;padding:12px 28px;font-family:var(--f-m);font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:none;cursor:pointer;transition:.15s}
+.wc-btn:hover{background:var(--forest3);transform:translateY(-1px)}
+.wc-stats{display:flex;justify-content:center;gap:52px;margin-top:48px;flex-wrap:wrap}
+.ws-n{font-family:var(--f-d);font-size:42px;color:var(--gold);font-weight:600;font-style:italic;line-height:1}
+.ws-l{font-family:var(--f-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-m);margin-top:5px}
+
+/* ── RISK BANNER ── */
+.risk{background:var(--red-bg);border:1px solid rgba(168,48,48,.25);padding:9px 16px;font-family:var(--f-m);font-size:10.5px;color:var(--rust);letter-spacing:.03em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.risk.hidden{display:none}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tab-btn{padding:9px 22px;border:none;background:none;cursor:pointer;font-family:var(--f-m);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-m);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.14s;white-space:nowrap}
+.tab-btn.active{color:var(--forest);border-bottom-color:var(--forest)}
+.tab-btn:not(.active):hover{color:var(--ink3)}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ── SEC LABEL ── */
+.sec{font-family:var(--f-m);font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin:26px 0 14px;display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:0;background:var(--line);border:1px solid var(--line);margin-bottom:2px}
+@media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(5,1fr)}}
+@media(max-width:900px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+.kpi{
+  background:var(--card);padding:18px 16px 15px;position:relative;
+  transition:background .14s;overflow:hidden;
+}
+.kpi:hover{background:var(--bg)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--forest)}
+.kpi[data-c="gold"]::before{background:var(--gold2)}
+.kpi[data-c="sage"]::before{background:var(--sage)}
+.kpi[data-c="sky"]::before{background:var(--sky)}
+.kpi[data-c="amber"]::before{background:var(--amber)}
+.kpi[data-c="rust"]::before{background:var(--rust)}
+.kpi-ico{font-size:18px;margin-bottom:8px;display:block;opacity:.85}
+.kpi-l{font-family:var(--f-m);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-m);margin-bottom:5px}
+.kpi-v{font-family:var(--f-d);font-size:26px;font-weight:700;color:var(--ink);line-height:1}
+.kpi-s{font-size:10.5px;color:var(--ink3);margin-top:4px}
+.kpi-bar{height:2px;background:var(--bg2);margin-top:12px}
+.kpi-fill{height:100%;background:var(--forest);transition:width .9s cubic-bezier(.34,1.2,.64,1)}
+.kpi[data-c="gold"]  .kpi-fill{background:var(--gold2)}
+.kpi[data-c="sage"]  .kpi-fill{background:var(--sage)}
+.kpi[data-c="sky"]   .kpi-fill{background:var(--sky)}
+.kpi[data-c="amber"] .kpi-fill{background:var(--amber)}
+.kpi[data-c="rust"]  .kpi-fill{background:var(--rust)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--line);margin-bottom:18px;overflow:hidden;box-shadow:var(--sh)}
+.ch{padding:14px 20px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--bg)}
+.ct{font-family:var(--f-d);font-size:15px;font-weight:600;color:var(--ink)}
+.cb{padding:18px 20px}
+.cb.flush{padding:0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+.g3{display:grid;grid-template-columns:3fr 2fr;gap:18px;margin-bottom:18px}
+@media(max-width:1080px){.g2,.g3{grid-template-columns:1fr}}
+
+/* ── FILTERS ── */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+select,.inp{padding:6px 11px;background:var(--bg);border:1px solid var(--line2);color:var(--ink);font-family:var(--f-m);font-size:10px;letter-spacing:.03em;outline:none;transition:border-color .15s;border-radius:var(--r)}
+select:focus,.inp:focus{border-color:var(--forest)}
+.inp{width:220px;font-family:var(--f-b);font-size:12px;color:var(--ink)}
+.inp::placeholder{color:var(--text-m)}
+
+/* ── TABLES ── */
+.tw{overflow-x:auto;max-height:500px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{background:var(--forest2);color:rgba(255,255,255,.85);padding:9px 13px;text-align:left;font-family:var(--f-m);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;position:sticky;top:0;z-index:5;border-right:1px solid rgba(255,255,255,.08)}
+tbody td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:middle;color:var(--ink3)}
+tbody tr:hover td{background:var(--bg2);color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+.an{font-weight:600;color:var(--ink);font-size:12.5px}
+
+/* ── BADGES ── */
+.badge{padding:2px 9px;font-family:var(--f-m);font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;display:inline-block;white-space:nowrap;border-radius:2px}
+.b-on  {background:rgba(46,94,62,.12);color:var(--forest);border:1px solid rgba(46,94,62,.25)}
+.b-risk{background:rgba(181,117,30,.12);color:var(--gold);border:1px solid rgba(181,117,30,.25)}
+.b-crit{background:var(--red-bg);color:var(--rust);border:1px solid rgba(168,48,48,.25)}
+.b-none{background:var(--bg2);color:var(--text-m);border:1px solid var(--line)}
+
+/* ── SUB CHIPS ── */
+.sc{display:inline-block;background:var(--gold-bg);border:1px solid rgba(181,117,30,.2);color:var(--gold);padding:2px 8px;font-size:10.5px;margin:2px;cursor:pointer;transition:.12s;border-radius:2px}
+.sc:hover{background:rgba(181,117,30,.18)}
+.sc-more{background:var(--bg2);border-color:var(--line2);color:var(--text-m)}
+
+/* ── MINI BAR ── */
+.mb{height:4px;background:var(--bg2);overflow:hidden;min-width:52px;border-radius:2px}
+.mbf{height:100%;border-radius:2px;transition:width .5s}
+
+/* ── MINI KPI ROW ── */
+.mkrow{display:flex;gap:0;background:var(--line);border:1px solid var(--line);margin-bottom:18px;flex-wrap:wrap}
+.mk{background:var(--card);padding:14px 18px;flex:1;min-width:120px;text-align:center}
+.mkv{font-family:var(--f-d);font-size:26px;font-weight:600;color:var(--gold);font-style:italic}
+.mkl{font-family:var(--f-m);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-m);margin-top:4px}
+
+/* ── YEAR PILLS ── */
+.yp-row{display:flex;gap:4px;flex-wrap:wrap}
+.yp{padding:4px 14px;font-family:var(--f-m);font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--line2);background:transparent;color:var(--text-m);cursor:pointer;transition:.13s;border-radius:var(--r)}
+.yp.active{background:var(--forest);color:#fff;border-color:var(--forest)}
+.yp:not(.active):hover{border-color:var(--forest);color:var(--forest)}
+
+/* ── MAP ── */
+#mapEl{height:500px;width:100%}
+.map-leg{display:flex;gap:14px;flex-wrap:wrap;padding:10px 20px 0;font-family:var(--f-m);font-size:9.5px;letter-spacing:.04em;color:var(--text-m)}
+.lg{display:flex;align-items:center;gap:5px}
+.ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.leaflet-popup-content{font-family:var(--f-b);font-size:12.5px;max-width:330px}
+.pn{font-family:var(--f-d);font-size:16px;margin-bottom:5px;color:#1C1810}
+.pt{display:inline-block;padding:2px 8px;font-size:10px;font-weight:600;margin:2px 2px 3px 0}
+.pd{background:#DCFCE7;color:#065F46}.pp{background:#FEF3C7;color:#78350F}
+.phr{border:none;border-top:1px solid #ddd;margin:7px 0}
+
+/* ── LAT/LNG INPUT PANEL ── */
+.ll-panel{padding:14px 20px;border-top:1px solid var(--line);background:var(--bg)}
+.ll-title{font-family:var(--f-m);font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-m);margin-bottom:10px}
+.ll-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.ll-row{display:flex;align-items:center;gap:7px;font-size:12px}
+.ll-row label{font-family:var(--f-m);font-size:9px;color:var(--ink3);width:90px;flex-shrink:0;letter-spacing:.04em}
+.ll-row input{padding:5px 9px;border:1px solid var(--line2);background:var(--card);font-family:var(--f-m);font-size:10px;color:var(--ink);width:100px;outline:none;border-radius:var(--r)}
+.ll-row input:focus{border-color:var(--forest)}
+.btn-ll{background:var(--forest);color:#fff;border:none;padding:5px 12px;font-family:var(--f-m);font-size:9.5px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-radius:var(--r);transition:.13s}
+.btn-ll:hover{background:var(--forest3)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(28,24,16,.55);backdrop-filter:blur(3px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:24px}
+.modal-bg.off{display:none}
+.modal{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--gold2);max-width:760px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--sh2)}
+.mh{padding:20px 24px 15px;border-bottom:1px solid var(--line);background:var(--bg);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.mt{font-family:var(--f-d);font-size:18px;font-weight:600;color:var(--ink);line-height:1.25}
+.mp{font-family:var(--f-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:5px}
+.mcl{background:var(--bg2);border:1px solid var(--line);color:var(--ink3);font-size:15px;padding:3px 8px;cursor:pointer;flex-shrink:0;border-radius:var(--r);transition:.13s;line-height:1}
+.mcl:hover{border-color:var(--forest);color:var(--forest)}
+.mb2{padding:20px 24px 26px}
+.step{display:flex;align-items:flex-start;gap:14px;padding:10px 0;border-bottom:1px solid var(--bg2)}
+.step:last-child{border-bottom:none}
+.sn{width:24px;height:24px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--f-m);font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px;border-radius:2px}
+.sbody{flex:1}
+.stxt{font-size:13px;color:var(--ink);line-height:1.55}
+.sresp{display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-family:var(--f-m);font-size:9.5px;color:var(--gold);background:var(--gold-bg);border:1px solid rgba(181,117,30,.2);padding:3px 9px;border-radius:2px}
+.mnote{margin-top:16px;padding:12px 14px;background:var(--bg);border-left:2px solid var(--gold2);font-size:12px;color:var(--ink3);line-height:1.6}
+
+/* ── CHARTS ── */
+.ch400{width:100%;height:400px}
+.ch450{width:100%;height:450px}
+.ch500{width:100%;height:500px}
+.ch760{width:100%;height:760px}
+
+/* ── RESP TAG ── */
+.rtag{background:rgba(46,94,62,.1);color:var(--forest);padding:2px 8px;font-family:var(--f-m);font-size:9.5px;display:inline-block;margin:1px 2px;border-radius:2px;border:1px solid rgba(46,94,62,.18)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="h-left">
+    <div class="h-mark">M&amp;E</div>
+    <div>
+      <div class="h-name">FERTILE</div>
+      <div class="h-sub">SAFE × SBI Foundation · Begusarai, Bihar · 3-Year Programme</div>
+    </div>
+  </div>
+  <div class="h-right">
+    <span class="h-pill">45 Villages · 2,400 Beneficiaries</span>
+    <span id="hFn" class="h-fn">No file loaded</span>
+    <button class="btn-load" onclick="document.getElementById('fi').click()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Load CSV / Excel
+    </button>
+    <input type="file" id="fi" accept=".csv,.xlsx,.xls">
+  </div>
+</header>
+
+<div id="app">
+  <div id="aErr" class="alert a-err"></div>
+  <div id="aOk"  class="alert a-ok"></div>
+  <div id="spin" class="loading"><div class="spin"></div><div class="spin-lbl">Processing field data…</div></div>
+
+  <!-- WELCOME -->
+  <div id="welcome">
+    <div class="wc-tag">Monitoring &amp; Evaluation Platform</div>
+    <h1 class="wc-h">FERTILE<br><em>Field Dashboard</em></h1>
+    <p class="wc-p">Farmer Empowerment Through Resilient Technologies, Integrated Livelihoods &amp; Ecological Solutions — Begusarai District, Bihar</p>
+    <button class="wc-btn" onclick="document.getElementById('fi').click()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload Project CSV
+    </button>
+    <div class="wc-stats">
+      <div><div class="ws-n">2,400</div><div class="ws-l">Direct Beneficiaries</div></div>
+      <div><div class="ws-n">45</div><div class="ws-l">Survey Villages</div></div>
+      <div><div class="ws-n">15</div><div class="ws-l">Intervention Villages</div></div>
+      <div><div class="ws-n">3</div><div class="ws-l">FPOs</div></div>
+      <div><div class="ws-n">36</div><div class="ws-l">Project Months</div></div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dash" style="display:none">
+    <div id="riskBanner" class="risk hidden">⚠&ensp;<strong>Flags —</strong>&ensp;<span id="riskTxt"></span></div>
+
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="tab('ov',this)">Overview</button>
+      <button class="tab-btn" onclick="tab('bn',this)">Beneficiaries</button>
+      <button class="tab-btn" onclick="tab('mp',this)">Village Map</button>
+      <button class="tab-btn" onclick="tab('ac',this)">Activities</button>
+      <button class="tab-btn" onclick="tab('gt',this)">Timeline</button>
+      <button class="tab-btn" onclick="tab('iv',this)">Interventions</button>
+      <button class="tab-btn" onclick="tab('fp',this)">FPO</button>
+    </div>
+
+    <!-- ══ OVERVIEW ══ -->
+    <div id="tab-ov" class="tab-pane active">
+      <div class="sec">Executive KPIs</div>
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="sec" style="margin-top:26px">Progress &amp; Community Engagement</div>
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch">
+            <span class="ct">Cumulative Progress — S-Curve</span>
+            <select id="scAct" onchange="drawSC()"><option value="all">All Activities</option></select>
+          </div>
+          <div class="cb"><div id="scChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Community Awareness Sessions</span></div>
+          <div class="cb"><div id="awChart" class="ch400"></div></div>
+        </div>
+      </div>
+
+      <div class="g2" style="margin-top:18px">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Capacity Building Sessions</span></div>
+          <div class="cb"><div id="cbChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Proposed vs Achieved — All Activities</span></div>
+          <div class="cb"><div id="barChart" class="ch400"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ BENEFICIARIES ══ -->
+    <div id="tab-bn" class="tab-pane">
+      <div class="sec">Beneficiary Analytics</div>
+      <div class="mkrow" id="benefRow"></div>
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Beneficiary Categories</span></div>
+          <div class="cb"><div id="pieChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Income Dynamics of Beneficiaries</span></div>
+          <div class="cb"><div id="incChart" class="ch400"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">Income Increase Tracking — by Quarter</span>
+        </div>
+        <div class="cb"><div id="incQChart" class="ch400"></div></div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">Quarterly Execution Tracker</span>
+          <select id="yrTrack" onchange="drawQtrTable()">
+            <option value="Y1">Year 1</option><option value="Y2">Year 2</option><option value="Y3">Year 3</option>
+          </select>
+        </div>
+        <div class="cb"><div id="qtrTable" class="tw"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ MAP ══ -->
+    <div id="tab-mp" class="tab-pane">
+      <div class="sec">Geo-Spatial Intelligence</div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">Village Intervention Map — Begusarai District, Bihar</span>
+          <div class="filters">
+            <select id="mapBlock" onchange="refreshMap()">
+              <option value="all">All Blocks</option>
+              <option value="Block 1">Dandari Block</option>
+              <option value="Block 2">Matihani Block</option>
+              <option value="Block 3">Khudabandpur Block</option>
+            </select>
+            <select id="mapYear" onchange="refreshMap()">
+              <option value="all">All Years</option>
+              <option value="Y1">Year 1</option><option value="Y2">Year 2</option><option value="Y3">Year 3</option>
+            </select>
+          </div>
+        </div>
+        <div class="map-leg">
+          <div class="lg"><span class="ld" style="background:#3A6F94"></span>Survey Village (45)</div>
+          <div class="lg"><span class="ld" style="background:#2E5E3E"></span>Intervention Active</div>
+          <div class="lg"><span class="ld" style="background:#B5751E"></span>Float Farm</div>
+          <div class="lg"><span class="ld" style="background:#A83030"></span>Agro-Processing Unit</div>
+          <div class="lg"><span class="ld" style="background:#5A7E62"></span>Agroforestry / INF</div>
+          <div class="lg"><span class="ld" style="background:#C4722A"></span>Beneficiary Plot</div>
+        </div>
+        <div class="cb flush"><div id="mapEl"></div></div>
+        <!-- LAT/LNG EDITOR -->
+        <div class="ll-panel">
+          <div class="ll-title">📍 Enter / Update Coordinates — Villages, Sites &amp; Assets</div>
+          <div class="ll-grid" id="llGrid"></div>
+          <div style="margin-top:12px">
+            <button class="btn-ll" onclick="applyCoords()">Apply Coordinates &amp; Refresh Map</button>
+            <button class="btn-ll" style="margin-left:8px;background:var(--sky)" onclick="exportCoordsCSV()">Export Coordinates CSV</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">Village-Wise Activity Register — 45 Villages</span>
+          <select id="vBlock" onchange="drawVillageTable()">
+            <option value="all">All Blocks</option>
+            <option value="Block 1">Dandari</option>
+            <option value="Block 2">Matihani</option>
+            <option value="Block 3">Khudabandpur</option>
+          </select>
+        </div>
+        <div class="cb"><div id="vilTable" class="tw"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ ACTIVITIES ══ -->
+    <div id="tab-ac" class="tab-pane">
+      <div class="sec">Full Activity Register</div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">All Activities &amp; Sub-Activities</span>
+          <div class="filters">
+            <input class="inp" id="srch" placeholder="Search activity, village, sub-activity…" oninput="filterActs()">
+            <select id="fYr"   onchange="filterActs()"><option value="all">All Years</option><option value="Y1">Y1</option><option value="Y2">Y2</option><option value="Y3">Y3</option></select>
+            <select id="fQtr"  onchange="filterActs()"><option value="all">All Quarters</option><option value="Q1">Q1</option><option value="Q2">Q2</option><option value="Q3">Q3</option><option value="Q4">Q4</option></select>
+            <select id="fResp" onchange="filterActs()"><option value="all">All Responsibility</option></select>
+            <select id="fSt"   onchange="filterActs()"><option value="all">All Status</option><option value="On Track">On Track</option><option value="At Risk">At Risk</option><option value="Critical">Critical</option><option value="Not Started">Not Started</option></select>
+          </div>
+        </div>
+        <div class="cb"><div id="actTable" class="tw"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ GANTT ══ -->
+    <div id="tab-gt" class="tab-pane">
+      <div class="sec">36-Month Activity Timeline</div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">Project Gantt Chart</span>
+          <div class="yp-row" id="ganttPills">
+            <button class="yp active" onclick="setGY(this,'all')">All</button>
+            <button class="yp" onclick="setGY(this,'Y1')">Year 1</button>
+            <button class="yp" onclick="setGY(this,'Y2')">Year 2</button>
+            <button class="yp" onclick="setGY(this,'Y3')">Year 3</button>
+          </div>
+        </div>
+        <div class="cb"><div id="ganttChart" class="ch760"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ INTERVENTIONS ══ -->
+    <div id="tab-iv" class="tab-pane">
+      <div class="sec">Livelihood Intervention Models</div>
+      <div class="mkrow" id="ivRow"></div>
+
+      <!-- APU + Seed side by side -->
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Agro-Processing Unit (APU)</span></div>
+          <div class="cb"><div id="apuChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Seed Conservation Center &amp; Farmer Field School</span></div>
+          <div class="cb"><div id="seedChart" class="ch400"></div></div>
+        </div>
+      </div>
+
+      <!-- Float + Agroforestry side by side -->
+      <div class="g2" style="margin-top:18px">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Integrated Float Demo Farms</span></div>
+          <div class="cb"><div id="floatChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Agroforestry Demo Farms</span></div>
+          <div class="cb"><div id="afChart" class="ch400"></div></div>
+        </div>
+      </div>
+
+      <!-- INF full width -->
+      <div class="card" style="margin-top:18px">
+        <div class="ch"><span class="ct">Indigenous Natural Farming Demo Farms</span></div>
+        <div class="cb"><div id="infChart" class="ch400"></div></div>
+      </div>
+
+      <!-- Activity register for all interventions -->
+      <div class="card" style="margin-top:18px">
+        <div class="ch"><span class="ct">Intervention Activity Register</span></div>
+        <div class="cb"><div id="ivTable" class="tw"></div></div>
+      </div>
+    </div>
+
+    <!-- ══ FPO ══ -->
+    <div id="tab-fp" class="tab-pane">
+      <div class="sec">Farmer Producer Organisation</div>
+      <div class="mkrow" id="fpoRow"></div>
+
+      <div class="g2">
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">FPO Membership Progress</span></div>
+          <div class="cb"><div id="fpoChart" class="ch400"></div></div>
+        </div>
+        <div class="card" style="margin-bottom:0">
+          <div class="ch"><span class="ct">Yield &amp; Income Targets</span></div>
+          <div class="cb"><div id="outChart" class="ch400"></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="ch"><span class="ct">FPO Activity Register</span></div>
+        <div class="cb"><div id="fpoTable" class="tw"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /dash -->
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div id="modalBg" class="modal-bg off" onclick="maybeClose(event)">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div class="mt" id="mTitle"></div>
+        <div class="mp" id="mPeriod"></div>
+      </div>
+      <button class="mcl" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mb2" id="mBody"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════
+   VILLAGE COORDINATE STORE (editable by user)
+══════════════════════════════════════════════════ */
+const DEFAULT_VC = {
+  "Village 1": {lat:25.3572,lng:86.0614,block:"Block 1",bn:"Dandari"},
+  "Village 2": {lat:25.3698,lng:86.0842,block:"Block 1",bn:"Dandari"},
+  "Village 3": {lat:25.3619,lng:86.0523,block:"Block 1",bn:"Dandari"},
+  "Village 4": {lat:25.3764,lng:86.0761,block:"Block 1",bn:"Dandari"},
+  "Village 5": {lat:25.3541,lng:86.0488,block:"Block 1",bn:"Dandari"},
+  "Village 6": {lat:25.3832,lng:86.0632,block:"Block 1",bn:"Dandari"},
+  "Village 7": {lat:25.3678,lng:86.0903,block:"Block 1",bn:"Dandari"},
+  "Village 8": {lat:25.3594,lng:86.0711,block:"Block 1",bn:"Dandari"},
+  "Village 9": {lat:25.3801,lng:86.0847,block:"Block 1",bn:"Dandari"},
+  "Village 10":{lat:25.3556,lng:86.0569,block:"Block 1",bn:"Dandari"},
+  "Village 11":{lat:25.3743,lng:86.0686,block:"Block 1",bn:"Dandari"},
+  "Village 12":{lat:25.3621,lng:86.0792,block:"Block 1",bn:"Dandari"},
+  "Village 13":{lat:25.3849,lng:86.0723,block:"Block 1",bn:"Dandari"},
+  "Village 14":{lat:25.3588,lng:86.0651,block:"Block 1",bn:"Dandari"},
+  "Village 15":{lat:25.3712,lng:86.0578,block:"Block 1",bn:"Dandari"},
+  "Village 16":{lat:25.4124,lng:86.1087,block:"Block 2",bn:"Matihani"},
+  "Village 17":{lat:25.4287,lng:86.1234,block:"Block 2",bn:"Matihani"},
+  "Village 18":{lat:25.4063,lng:86.1152,block:"Block 2",bn:"Matihani"},
+  "Village 19":{lat:25.4198,lng:86.0976,block:"Block 2",bn:"Matihani"},
+  "Village 20":{lat:25.4312,lng:86.1301,block:"Block 2",bn:"Matihani"},
+  "Village 21":{lat:25.4089,lng:86.1043,block:"Block 2",bn:"Matihani"},
+  "Village 22":{lat:25.4234,lng:86.1178,block:"Block 2",bn:"Matihani"},
+  "Village 23":{lat:25.4167,lng:86.1312,block:"Block 2",bn:"Matihani"},
+  "Village 24":{lat:25.4045,lng:86.0998,block:"Block 2",bn:"Matihani"},
+  "Village 25":{lat:25.4278,lng:86.1089,block:"Block 2",bn:"Matihani"},
+  "Village 26":{lat:25.4136,lng:86.1213,block:"Block 2",bn:"Matihani"},
+  "Village 27":{lat:25.4203,lng:86.1056,block:"Block 2",bn:"Matihani"},
+  "Village 28":{lat:25.4349,lng:86.1189,block:"Block 2",bn:"Matihani"},
+  "Village 29":{lat:25.4082,lng:86.1267,block:"Block 2",bn:"Matihani"},
+  "Village 30":{lat:25.4219,lng:86.0934,block:"Block 2",bn:"Matihani"},
+  "Village 31":{lat:25.4567,lng:86.1634,block:"Block 3",bn:"Khudabandpur"},
+  "Village 32":{lat:25.4712,lng:86.1789,block:"Block 3",bn:"Khudabandpur"},
+  "Village 33":{lat:25.4489,lng:86.1723,block:"Block 3",bn:"Khudabandpur"},
+  "Village 34":{lat:25.4634,lng:86.1567,block:"Block 3",bn:"Khudabandpur"},
+  "Village 35":{lat:25.4756,lng:86.1845,block:"Block 3",bn:"Khudabandpur"},
+  "Village 36":{lat:25.4523,lng:86.1698,block:"Block 3",bn:"Khudabandpur"},
+  "Village 37":{lat:25.4678,lng:86.1612,block:"Block 3",bn:"Khudabandpur"},
+  "Village 38":{lat:25.4601,lng:86.1756,block:"Block 3",bn:"Khudabandpur"},
+  "Village 39":{lat:25.4734,lng:86.1534,block:"Block 3",bn:"Khudabandpur"},
+  "Village 40":{lat:25.4556,lng:86.1823,block:"Block 3",bn:"Khudabandpur"},
+  "Village 41":{lat:25.4689,lng:86.1678,block:"Block 3",bn:"Khudabandpur"},
+  "Village 42":{lat:25.4612,lng:86.1589,block:"Block 3",bn:"Khudabandpur"},
+  "Village 43":{lat:25.4745,lng:86.1712,block:"Block 3",bn:"Khudabandpur"},
+  "Village 44":{lat:25.4534,lng:86.1645,block:"Block 3",bn:"Khudabandpur"},
+  "Village 45":{lat:25.4667,lng:86.1834,block:"Block 3",bn:"Khudabandpur"}
+};
+// Working copy — gets overridden by CSV Latitude/Longitude or user input
+let VC = JSON.parse(JSON.stringify(DEFAULT_VC));
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+let D=[], charts={}, map=null, markers=[], ganttY='all';
+const QS=['Y1Q1','Y1Q2','Y1Q3','Y1Q4','Y2Q1','Y2Q2','Y2Q3','Y2Q4','Y3Q1','Y3Q2','Y3Q3','Y3Q4'];
+
+/* ══════════════════════════════════════════════════
+   FILE UPLOAD
+══════════════════════════════════════════════════ */
+document.getElementById('fi').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f) return;
+  document.getElementById('hFn').textContent=f.name;
+  document.getElementById('spin').style.display='block';
+  document.getElementById('welcome').style.display='none';
+  const r=new FileReader();
+  r.onload=ev=>{
+    try{
+      let rows;
+      if(f.name.match(/\.csv$/i)) rows=parseCSV(new TextDecoder().decode(new Uint8Array(ev.target.result)));
+      else{const wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});}
+      process(rows);
+    }catch(err){showAlert('err','Error: '+err.message);document.getElementById('spin').style.display='none';document.getElementById('welcome').style.display='block';}
+  };
+  r.readAsArrayBuffer(f);
+});
+
+function parseCSV(txt){
+  function pl(line){const r=[];let c='',q=false;for(const ch of line){if(ch==='"'){q=!q;}else if(ch===','&&!q){r.push(c.trim());c='';}else c+=ch;}r.push(c.trim());return r;}
+  const lines=txt.split('\n').filter(l=>l.trim());
+  const hdrs=pl(lines[0]).map(h=>h.replace(/^"|"$/g,'').trim());
+  return lines.slice(1).map(line=>{
+    const vals=pl(line).map(v=>v.replace(/^"|"$/g,'').trim());
+    const obj={};hdrs.forEach((h,i)=>obj[h]=vals[i]!==undefined?vals[i]:'');
+    return obj;
+  }).filter(r=>r[hdrs[0]]);
+}
+
+/* ══════════════════════════════════════════════════
+   PROCESS
+══════════════════════════════════════════════════ */
+function n(row,k){return parseFloat(row[k]||0)||0;}
+function process(rows){
+  D=[];
+  rows.forEach((row,idx)=>{
+    const year=(row['Year']||'').toString().trim().toUpperCase();
+    const quarter=(row['Quarter']||'').toString().trim().toUpperCase();
+    if(!year||!quarter) return;
+
+    const activity=(row['Activity']||'Unknown').trim();
+    const proposed=n(row,'Proposed_Quantity')||n(row,'Proposed Quantity')||n(row,'Proposed');
+    const achieved=parseFloat(row['Achieved_Quantity']||row['Achieved quantity']||row['Achieved']||'0')||0;
+    const yN=parseInt(year.replace('Y',''))||1;
+    const qN=parseInt(quarter.replace('Q',''))||1;
+
+    // sub-activities + responsibilities — collect all 12 slots
+    const subs=[],resps=[];
+    for(let i=1;i<=12;i++){
+      const sa=(row[`Sub_Activity_${i}`]||row[`Sub_activities_${i}`]||'').trim();
+      if(sa){subs.push(sa);resps.push((row[`Sub_Activity_${i}_Responsibility`]||'').trim());}
+    }
+
+    // if CSV has Latitude/Longitude for this row's village, update VC
+    const vname=(row['Village']||'').trim();
+    const lat=parseFloat(row['Latitude']||'');
+    const lng=parseFloat(row['Longitude']||'');
+    if(vname && !isNaN(lat) && !isNaN(lng) && lat!==0 && lng!==0){
+      if(VC[vname]) {VC[vname].lat=lat;VC[vname].lng=lng;}
+      else {
+        const blk=(row['Block']||'').trim();
+        const bn=blk==='Block 1'?'Dandari':blk==='Block 2'?'Matihani':'Khudabandpur';
+        VC[vname]={lat,lng,block:blk,bn};
+      }
+    }
+
+    const pct=proposed>0?(achieved/proposed*100):0;
+    let status=(row['Status']||'').trim();
+    if(!status){status=achieved>0?(pct>=80?'On Track':pct>=40?'At Risk':'Critical'):'Not Started';}
+    const stCls={'On Track':'b-on','At Risk':'b-risk','Critical':'b-crit','Not Started':'b-none'}[status]||'b-none';
+
+    D.push({
+      id:idx,year,quarter,yN,qN,activity,
+      unit:(row['Unit']||'—').trim(),
+      proposed,achieved,pct,status,stCls,
+      startM:(yN-1)*12+(qN-1)*3+1,
+      village:vname||null,
+      block:(row['Block']||'').trim()||null,
+      notes:(row['Notes']||row['notes']||'').trim(),
+      subs,resps,
+      // beneficiary
+      dBP:n(row,'Direct_Beneficiaries_Proposed'),dBA:n(row,'Direct_Beneficiaries_Achieved'),
+      wBP:n(row,'Women_Beneficiaries_Proposed'),wBA:n(row,'Women_Beneficiaries_Achieved'),
+      iBP:n(row,'Indirect_Beneficiaries_Proposed'),iBA:n(row,'Indirect_Beneficiaries_Achieved'),
+      // income
+      baseInc:n(row,'Avg_Baseline_Income_INR'),curInc:n(row,'Avg_Current_Income_INR'),
+      incPctP:n(row,'Income_Increase_Pct_Proposed'),incPctA:n(row,'Income_Increase_Pct_Achieved'),
+      hhInc:n(row,'Households_With_Income_Data'),
+      // awareness & capacity
+      awP:n(row,'Community_Awareness_Sessions_Proposed'),awA:n(row,'Community_Awareness_Sessions_Achieved'),
+      cbP:n(row,'Capacity_Building_Sessions_Proposed'),cbA:n(row,'Capacity_Building_Sessions_Achieved'),
+      trP:n(row,'Farmers_Trained_Proposed'),trA:n(row,'Farmers_Trained_Achieved'),
+      // FPO
+      fMP:n(row,'FPO_Members_Proposed'),fMA:n(row,'FPO_Members_Achieved'),
+      // APU
+      apuOp:n(row,'APU_Operational'),apuKg:n(row,'APU_Products_Processed_Kg'),
+      // Seed
+      seedOp:n(row,'Seed_Center_Operational'),seedV:n(row,'Seed_Varieties_Conserved'),ffsS:n(row,'FFS_Sessions_Conducted'),
+      // Assets
+      ffP:n(row,'Float_Farm_Units_Proposed'),ffA:n(row,'Float_Farm_Units_Achieved'),
+      afP:n(row,'Agroforestry_Ha_Proposed'),afA:n(row,'Agroforestry_Ha_Achieved'),
+      infP:n(row,'INF_Ha_Proposed'),infA:n(row,'INF_Ha_Achieved'),
+      photos:(row['Photos_Collected']||'').toLowerCase()==='yes',
+      videos:(row['Videos_Collected']||'').toLowerCase()==='yes'
+    });
+  });
+
+  boot();
+}
+
+/* ══════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════ */
+function boot(){
+  document.getElementById('spin').style.display='none';
+  document.getElementById('welcome').style.display='none';
+  document.getElementById('dash').style.display='block';
+  drawKPIs(); drawRisk();
+  drawSC(); populateSCFilter(); populateRespFilter();
+  drawAware(); drawCB(); drawBar();
+  drawBenefTab(); drawFPOTab(); drawInterventionsTab();
+  drawQtrTable(); drawVillageTable();
+  drawActTable(D); drawGantt();
+  buildLLGrid();
+  setTimeout(initMap,120);
+  showAlert('ok','Loaded '+D.length+' activity records.');
+}
+
+/* ══════════════════════════════════════════════════
+   TAB
+══════════════════════════════════════════════════ */
+function tab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='mp'){if(!map)setTimeout(initMap,150);else setTimeout(()=>map.invalidateSize(),150);}
+  if(name==='iv'||name==='fp') setTimeout(()=>Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}}),120);
+  setTimeout(()=>Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}}),100);
+}
+
+/* ══════════════════════════════════════════════════
+   KPIs — 10 cards, fills the full row
+══════════════════════════════════════════════════ */
+function drawKPIs(){
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const dA=S(d=>d.dBA)||Math.min(S(d=>d.achieved)*8,2400);
+  const wA=S(d=>d.wBA)||Math.round(dA*.52);
+  const trA=S(d=>d.trA)||D.filter(d=>d.activity.toLowerCase().includes('capacity')&&d.achieved>0).reduce((s,d)=>s+d.achieved*10,0);
+  const awA=S(d=>d.awA);
+  const cbA=S(d=>d.cbA)||D.filter(d=>d.activity.toLowerCase().includes('capacity')).reduce((s,d)=>s+d.achieved,0);
+  const fA=S(d=>d.fMA)||0;
+  const vs=new Set(D.map(d=>d.village).filter(Boolean)).size;
+  const tP=S(d=>d.proposed),tAch=S(d=>d.achieved);
+  const pct=tP>0?(tAch/tP*100):0;
+  const ffA=S(d=>d.ffA),apuA=S(d=>d.apuOp),seedA=S(d=>d.seedOp);
+  const incPctA=S(d=>d.incPctA); const hhInc=S(d=>d.hhInc);
+
+  const kpis=[
+    {ico:'👨‍🌾',l:'Direct Beneficiaries',v:dA>0?dA.toLocaleString():'—',s:'Target: 2,400',p:dA/24,c:'default'},
+    {ico:'👩‍🌾',l:'Women Beneficiaries',v:wA>0?wA.toLocaleString():'—',s:'Target: ≥50%',p:(wA/(dA||1)*100)*2,c:'sage'},
+    {ico:'🎓',l:'Farmers Trained',v:trA>0?trA.toLocaleString():'—',s:'Capacity Building',p:trA/24,c:'sky'},
+    {ico:'🏘',l:'Villages Covered',v:vs||'—',s:'Survey 45 · Interv 15',p:(vs/45)*100,c:'default'},
+    {ico:'📢',l:'Awareness Sessions',v:awA>0?awA:'—',s:'Community sessions',p:Math.min(awA/50*100,100),c:'gold'},
+    {ico:'🌱',l:'Capacity Sessions',v:cbA>0?cbA:'—',s:'Training sessions conducted',p:Math.min(cbA/100*100,100),c:'sage'},
+    {ico:'🏢',l:'FPO Members',v:fA>0?fA:'—',s:'Target: 450 across 3 FPOs',p:fA/4.5,c:'sky'},
+    {ico:'⚡',l:'Assets Installed',v:(ffA+apuA+seedA)||'—',s:'Float · APU · Seed Center',p:Math.min((ffA+apuA+seedA)/10*100,100),c:'amber'},
+    {ico:'📈',l:'Income Increase',v:incPctA>0?incPctA.toFixed(1)+'%':'—',s:hhInc>0?hhInc+' HH tracked':'Target: 30–40%',p:(incPctA/40)*100,c:'gold'},
+    {ico:'✅',l:'Overall Progress',v:pct.toFixed(1)+'%',s:D.filter(d=>d.status==='On Track').length+'/'+D.length+' on track',p:pct,c:pct>=70?'default':pct>=40?'amber':'rust'}
+  ];
+
+  document.getElementById('kpiGrid').innerHTML=kpis.map(k=>`
+    <div class="kpi" data-c="${k.c}">
+      <span class="kpi-ico">${k.ico}</span>
+      <div class="kpi-l">${k.l}</div>
+      <div class="kpi-v">${k.v}</div>
+      <div class="kpi-s">${k.s}</div>
+      <div class="kpi-bar"><div class="kpi-fill" style="width:${Math.min(k.p||0,100)}%"></div></div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════
+   RISK
+══════════════════════════════════════════════════ */
+function drawRisk(){
+  const c=D.filter(d=>d.status==='Critical').length,r=D.filter(d=>d.status==='At Risk').length;
+  const np=D.filter(d=>d.achieved>0&&!d.photos).length;
+  const m=[];
+  if(c) m.push(c+' activities critically below target');
+  if(r) m.push(r+' at risk');
+  if(np) m.push(np+' completed activities missing photo docs');
+  const b=document.getElementById('riskBanner');
+  if(m.length){document.getElementById('riskTxt').textContent=m.join(' · ');b.classList.remove('hidden');}
+  else b.classList.add('hidden');
+}
+
+/* ══════════════════════════════════════════════════
+   S-CURVE (Proposed vs Actual only)
+══════════════════════════════════════════════════ */
+function populateSCFilter(){
+  const acts=[...new Set(D.map(d=>d.activity))].sort();
+  document.getElementById('scAct').innerHTML='<option value="all">All Activities</option>'+acts.map(a=>`<option value="${a}">${a.length>60?a.slice(0,60)+'…':a}</option>`).join('');
+}
+function drawSC(){
+  const filt=document.getElementById('scAct').value;
+  const data=filt==='all'?D:D.filter(d=>d.activity===filt);
+  let cp=0,ca=0; const pp=[],ap=[];
+  QS.forEach(q=>{
+    const[y,qn]=q.split('Q');
+    const pd=data.filter(d=>d.year===y&&d.quarter==='Q'+qn);
+    cp+=pd.reduce((s,d)=>s+d.proposed,0);
+    ca+=pd.reduce((s,d)=>s+d.achieved,0);
+    pp.push(+cp.toFixed(1)); ap.push(+ca.toFixed(1));
+  });
+  const el=document.getElementById('scChart');
+  if(charts.sc) charts.sc.dispose();
+  charts.sc=echarts.init(el);
+  charts.sc.setOption(lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'6%',right:'4%',bottom:'14%',top:'14%'},
+    xAxis:{type:'category',data:QS,axisLabel:{fontFamily:'Space Mono',fontSize:9,rotate:30,color:'#8A7E6E'},axisLine:{lineStyle:{color:'#D8D2C4'}}},
+    yAxis:{type:'value',axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Planned (Cumulative)',type:'line',data:pp,smooth:true,symbolSize:5,lineStyle:{color:'#3A6F94',width:2},itemStyle:{color:'#3A6F94'},areaStyle:{color:'rgba(58,111,148,.06)'}},
+      {name:'Actual (Cumulative)',type:'line',data:ap,smooth:true,symbolSize:6,lineStyle:{color:'#2E5E3E',width:2.5},itemStyle:{color:'#2E5E3E'},areaStyle:{color:'rgba(46,94,62,.08)'}}
+    ]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   AWARENESS CHART
+══════════════════════════════════════════════════ */
+function drawAware(){
+  const pp=[],ap=[];
+  QS.forEach(q=>{
+    const[y,qn]=q.split('Q');
+    const pd=D.filter(d=>d.year===y&&d.quarter==='Q'+qn);
+    pp.push(pd.reduce((s,d)=>s+d.awP,0));
+    ap.push(pd.reduce((s,d)=>s+d.awA,0));
+  });
+  const el=document.getElementById('awChart');
+  if(charts.aw) charts.aw.dispose();
+  charts.aw=echarts.init(el);
+  charts.aw.setOption(lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'10%',right:'4%',bottom:'14%',top:'14%'},
+    xAxis:{type:'category',data:QS,axisLabel:{fontFamily:'Space Mono',fontSize:9,rotate:30,color:'#8A7E6E'}},
+    yAxis:{type:'value',name:'Sessions',nameTextStyle:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Planned',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:pp,barMaxWidth:18},
+      {name:'Conducted',type:'bar',itemStyle:{color:'#B5751E',borderRadius:[2,2,0,0]},data:ap,barMaxWidth:18}
+    ]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   CAPACITY BUILDING CHART
+══════════════════════════════════════════════════ */
+function drawCB(){
+  const pp=[],ap=[];
+  QS.forEach(q=>{
+    const[y,qn]=q.split('Q');
+    const pd=D.filter(d=>d.year===y&&d.quarter==='Q'+qn);
+    // fallback: if cbP=0 but activity is Capacity Building, use proposed
+    const cbPlanned=pd.reduce((s,d)=>{
+      if(d.cbP>0) return s+d.cbP;
+      if(d.activity.toLowerCase().includes('capacity')) return s+d.proposed;
+      return s;
+    },0);
+    const cbAch=pd.reduce((s,d)=>{
+      if(d.cbA>0) return s+d.cbA;
+      if(d.activity.toLowerCase().includes('capacity')) return s+d.achieved;
+      return s;
+    },0);
+    pp.push(cbPlanned); ap.push(cbAch);
+  });
+  const el=document.getElementById('cbChart');
+  if(charts.cb) charts.cb.dispose();
+  charts.cb=echarts.init(el);
+  charts.cb.setOption(lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'10%',right:'4%',bottom:'14%',top:'14%'},
+    xAxis:{type:'category',data:QS,axisLabel:{fontFamily:'Space Mono',fontSize:9,rotate:30,color:'#8A7E6E'}},
+    yAxis:{type:'value',name:'Sessions',nameTextStyle:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Planned',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:pp,barMaxWidth:18},
+      {name:'Conducted',type:'bar',itemStyle:{color:'#5A7E62',borderRadius:[2,2,0,0]},data:ap,barMaxWidth:18}
+    ]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   BAR — PROPOSED vs ACHIEVED
+══════════════════════════════════════════════════ */
+function drawBar(){
+  const g={};
+  D.forEach(d=>{
+    if(!g[d.activity]) g[d.activity]={p:0,a:0};
+    g[d.activity].p+=d.proposed; g[d.activity].a+=d.achieved;
+  });
+  const sorted=Object.entries(g).sort((a,b)=>b[1].p-a[1].p).slice(0,20);
+  const el=document.getElementById('barChart');
+  if(charts.bar) charts.bar.dispose();
+  charts.bar=echarts.init(el);
+  charts.bar.setOption(lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'4%',right:'4%',bottom:'4%',top:'14%',containLabel:true},
+    xAxis:{type:'value',axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    yAxis:{type:'category',inverse:true,data:sorted.map(([a])=>a.length>44?a.slice(0,44)+'…':a),axisLabel:{interval:0,width:320,overflow:'break',lineHeight:14,fontSize:10,fontFamily:'Figtree',color:'#3D3626'}},
+    series:[
+      {name:'Proposed',type:'bar',itemStyle:{color:'#C8C0AE',borderRadius:[0,2,2,0]},data:sorted.map(([,v])=>v.p),barMaxWidth:12},
+      {name:'Achieved',type:'bar',itemStyle:{color:'#2E5E3E',borderRadius:[0,2,2,0]},data:sorted.map(([,v])=>v.a),barMaxWidth:12}
+    ]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   BENEFICIARY TAB
+══════════════════════════════════════════════════ */
+function drawBenefTab(){
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const dA=S(d=>d.dBA)||0, wA=S(d=>d.wBA)||0;
+  const iA=S(d=>d.iBA)||0, trA=S(d=>d.trA)||0;
+  const fA=S(d=>d.fMA)||0;
+
+  document.getElementById('benefRow').innerHTML=[
+    {v:dA>0?dA.toLocaleString():'—',l:'Direct Beneficiaries'},
+    {v:wA>0?wA.toLocaleString():'—',l:'Women Beneficiaries'},
+    {v:iA>0?iA.toLocaleString():'—',l:'Indirect Beneficiaries'},
+    {v:trA>0?trA.toLocaleString():'—',l:'Farmers Trained'},
+    {v:fA>0?fA.toLocaleString():'—',l:'FPO Members'}
+  ].map(x=>`<div class="mk"><div class="mkv">${x.v}</div><div class="mkl">${x.l}</div></div>`).join('');
+
+  // PIE
+  const el1=document.getElementById('pieChart');
+  if(charts.pie) charts.pie.dispose();
+  charts.pie=echarts.init(el1);
+  charts.pie.setOption(lOpts({
+    tooltip:{trigger:'item',formatter:'{b}: {c} ({d}%)'},
+    legend:{orient:'vertical',left:'2%',top:'center',textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    series:[{
+      type:'pie',radius:['40%','68%'],center:['63%','50%'],
+      label:{show:true,formatter:'{b}\n{d}%',fontSize:10,fontFamily:'Space Mono',color:'#3D3626'},
+      itemStyle:{borderRadius:2,borderColor:'#fff',borderWidth:3},
+      data:[
+        {value:1200,name:'Smallholder Farmers',itemStyle:{color:'#2E5E3E'}},
+        {value:600,name:'Women Farmers',itemStyle:{color:'#B5751E'}},
+        {value:400,name:'Youth 18–35',itemStyle:{color:'#3A6F94'}},
+        {value:150,name:'SC/ST Communities',itemStyle:{color:'#A83030'}},
+        {value:50,name:'FPO Members',itemStyle:{color:'#5A7E62'}}
+      ]
+    }]
+  }));
+
+  // INCOME DYNAMICS — gauge + bar showing baseline vs current
+  const el2=document.getElementById('incChart');
+  if(charts.inc) charts.inc.dispose();
+  charts.inc=echarts.init(el2);
+  const hasInc=D.some(d=>d.baseInc>0||d.curInc>0);
+  if(hasInc){
+    const byQ=QS.map(q=>{
+      const[y,qn]=q.split('Q');
+      const pd=D.filter(d=>d.year===y&&d.quarter==='Q'+qn&&d.baseInc>0);
+      if(!pd.length) return {q,base:0,cur:0};
+      return{q,base:pd.reduce((s,d)=>s+d.baseInc,0)/pd.length,cur:pd.reduce((s,d)=>s+d.curInc,0)/pd.length};
+    }).filter(x=>x.base>0||x.cur>0);
+    charts.inc.setOption(lOpts({
+      tooltip:{trigger:'axis',axisPointer:{type:'shadow'},formatter:params=>`${params[0].axisValue}<br>${params.map(p=>`${p.marker}${p.seriesName}: ₹${p.value.toLocaleString()}`).join('<br>')}`},
+      legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+      grid:{left:'10%',right:'4%',bottom:'14%',top:'14%'},
+      xAxis:{type:'category',data:byQ.map(x=>x.q),axisLabel:{fontFamily:'Space Mono',fontSize:9,rotate:30,color:'#8A7E6E'}},
+      yAxis:{type:'value',name:'₹ INR',nameTextStyle:{fontFamily:'Space Mono',fontSize:9},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E',formatter:v=>'₹'+v.toLocaleString()},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+      series:[
+        {name:'Avg Baseline Income',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:byQ.map(x=>x.base.toFixed(0)),barMaxWidth:22},
+        {name:'Avg Current Income',type:'bar',itemStyle:{color:'#2E5E3E',borderRadius:[2,2,0,0]},data:byQ.map(x=>x.cur.toFixed(0)),barMaxWidth:22}
+      ]
+    }));
+  } else {
+    // placeholder showing targets
+    charts.inc.setOption(lOpts({
+      title:{text:'Income data will populate as field data is entered',textStyle:{fontFamily:'Figtree',fontSize:12,color:'#8A7E6E',fontWeight:'normal'},left:'center',top:'center'},
+      xAxis:{show:false},yAxis:{show:false},series:[]
+    }));
+  }
+
+  // INCOME INCREASE % by quarter
+  const el3=document.getElementById('incQChart');
+  if(charts.incQ) charts.incQ.dispose();
+  charts.incQ=echarts.init(el3);
+  const incP=QS.map(q=>{const[y,qn]=q.split('Q');return D.filter(d=>d.year===y&&d.quarter==='Q'+qn).reduce((s,d)=>Math.max(s,d.incPctP),0);});
+  const incA=QS.map(q=>{const[y,qn]=q.split('Q');return D.filter(d=>d.year===y&&d.quarter==='Q'+qn).reduce((s,d)=>s+d.incPctA,0);});
+  charts.incQ.setOption(lOpts({
+    tooltip:{trigger:'axis',formatter:params=>`${params[0].axisValue}<br>${params.map(p=>`${p.marker}${p.seriesName}: ${p.value}%`).join('<br>')}`},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'8%',right:'4%',bottom:'14%',top:'14%'},
+    xAxis:{type:'category',data:QS,axisLabel:{fontFamily:'Space Mono',fontSize:9,rotate:30,color:'#8A7E6E'}},
+    yAxis:{type:'value',name:'% increase',max:50,nameTextStyle:{fontFamily:'Space Mono',fontSize:9},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E',formatter:'{value}%'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Target % Increase',type:'line',data:incP,smooth:true,lineStyle:{type:'dashed',color:'#C8C0AE',width:2},symbolSize:0},
+      {name:'Actual % Increase',type:'line',data:incA,smooth:true,lineStyle:{color:'#B5751E',width:2.5},itemStyle:{color:'#B5751E'},symbolSize:6,areaStyle:{color:'rgba(181,117,30,.08)'}}
+    ]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   INTERVENTIONS TAB
+══════════════════════════════════════════════════ */
+function drawInterventionsTab(){
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const apuOp=S(d=>d.apuOp),apuKg=S(d=>d.apuKg);
+  const seedOp=S(d=>d.seedOp),seedV=S(d=>d.seedV),ffsS=S(d=>d.ffsS);
+  const ffA=S(d=>d.ffA),afA=S(d=>d.afA),infA=S(d=>d.infA);
+
+  // mini KPI row for interventions
+  document.getElementById('ivRow').innerHTML=[
+    {v:apuOp>0?'✅ Active':'—',l:'APU Operational'},
+    {v:apuKg>0?apuKg.toLocaleString()+' kg':'—',l:'APU Output (kg)'},
+    {v:seedOp>0?'✅ Active':'—',l:'Seed Center Active'},
+    {v:seedV>0?seedV:'—',l:'Seed Varieties'},
+    {v:ffsS>0?ffsS:'—',l:'FFS Sessions'},
+    {v:ffA>0?ffA:'—',l:'Float Farm Units'},
+    {v:afA>0?afA+' Ha':'—',l:'Agroforestry Ha'},
+    {v:infA>0?infA+' Ha':'—',l:'INF Demo Ha'}
+  ].map(x=>`<div class="mk"><div class="mkv">${x.v}</div><div class="mkl">${x.l}</div></div>`).join('');
+
+  // helper for chart baseline
+  const chartBase=()=>lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'10%',right:'4%',bottom:'14%',top:'16%'},
+  });
+  const xAx=(data)=>({type:'category',data:data.length?data:['Not Yet Active'],axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'}});
+  const yAx=(name)=>({type:'value',name,nameTextStyle:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}});
+
+  // APU
+  const apuRows=D.filter(d=>d.activity.toLowerCase().includes('agro processing'));
+  const apuQs=apuRows.map(d=>d.year+' '+d.quarter);
+  const el1=document.getElementById('apuChart');
+  if(charts.apu) charts.apu.dispose();
+  charts.apu=echarts.init(el1);
+  charts.apu.setOption(Object.assign(chartBase(),{
+    xAxis:xAx(apuQs),
+    yAxis:[
+      Object.assign(yAx('Operational'),{max:1}),
+      Object.assign(yAx('Processed (kg)'),{splitLine:{show:false}})
+    ],
+    series:[
+      {name:'APU Operational',type:'bar',yAxisIndex:0,itemStyle:{color:'#2E5E3E',borderRadius:[2,2,0,0]},data:apuRows.map(d=>d.apuOp),barMaxWidth:28},
+      {name:'Products Processed (kg)',type:'line',yAxisIndex:1,lineStyle:{color:'#B5751E',width:2},itemStyle:{color:'#B5751E'},symbolSize:6,data:apuRows.map(d=>d.apuKg)}
+    ]
+  }));
+
+  // Seed Center + FFS
+  const seedRows=D.filter(d=>d.activity.toLowerCase().includes('seed'));
+  const seedQs=seedRows.map(d=>d.year+' '+d.quarter);
+  const el2=document.getElementById('seedChart');
+  if(charts.seed) charts.seed.dispose();
+  charts.seed=echarts.init(el2);
+  charts.seed.setOption(Object.assign(chartBase(),{
+    xAxis:xAx(seedQs),
+    yAxis:yAx('Count'),
+    series:[
+      {name:'Seed Varieties Conserved',type:'bar',itemStyle:{color:'#5A7E62',borderRadius:[2,2,0,0]},data:seedRows.map(d=>d.seedV),barMaxWidth:24},
+      {name:'FFS Sessions Conducted',type:'bar',itemStyle:{color:'#B5751E',borderRadius:[2,2,0,0]},data:seedRows.map(d=>d.ffsS),barMaxWidth:24}
+    ]
+  }));
+
+  // Float Farm
+  const ffRows=D.filter(d=>d.activity.toLowerCase().includes('float'));
+  const ffQs=ffRows.map(d=>d.year+' '+d.quarter);
+  const el3=document.getElementById('floatChart');
+  if(charts.ff) charts.ff.dispose();
+  charts.ff=echarts.init(el3);
+  charts.ff.setOption(Object.assign(chartBase(),{
+    xAxis:xAx(ffQs),
+    yAxis:yAx('Units'),
+    series:[
+      {name:'Planned',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:ffRows.map(d=>d.proposed),barMaxWidth:24},
+      {name:'Achieved',type:'bar',itemStyle:{color:'#3A6F94',borderRadius:[2,2,0,0]},data:ffRows.map(d=>d.ffA||d.achieved),barMaxWidth:24}
+    ]
+  }));
+
+  // Agroforestry
+  const afRows=D.filter(d=>d.activity.toLowerCase().includes('agroforestry'));
+  const afQs=afRows.map(d=>d.year+' '+d.quarter);
+  const el4=document.getElementById('afChart');
+  if(charts.af) charts.af.dispose();
+  charts.af=echarts.init(el4);
+  charts.af.setOption(Object.assign(chartBase(),{
+    xAxis:xAx(afQs),
+    yAxis:yAx('Hectares'),
+    series:[
+      {name:'Planned (Ha)',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:afRows.map(d=>d.proposed),barMaxWidth:24},
+      {name:'Achieved (Ha)',type:'bar',itemStyle:{color:'#5A7E62',borderRadius:[2,2,0,0]},data:afRows.map(d=>d.afA||d.achieved),barMaxWidth:24}
+    ]
+  }));
+
+  // INF
+  const infRows=D.filter(d=>d.activity.toLowerCase().includes('natural farm'));
+  const infQs=infRows.map(d=>d.year+' '+d.quarter);
+  const el5=document.getElementById('infChart');
+  if(charts.inf) charts.inf.dispose();
+  charts.inf=echarts.init(el5);
+  charts.inf.setOption(Object.assign(chartBase(),{
+    grid:{left:'8%',right:'4%',bottom:'14%',top:'14%'},
+    xAxis:xAx(infQs),
+    yAxis:yAx('Hectares'),
+    series:[
+      {name:'Planned (Ha)',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:infRows.map(d=>d.proposed),barMaxWidth:24},
+      {name:'Achieved (Ha)',type:'bar',itemStyle:{color:'#2E5E3E',borderRadius:[2,2,0,0]},data:infRows.map(d=>d.infA||d.achieved),barMaxWidth:24}
+    ]
+  }));
+
+  // Intervention activity register (APU + Seed + Float + AF + INF)
+  const ivActRows=D.filter(d=>{
+    const a=d.activity.toLowerCase();
+    return a.includes('agro processing')||a.includes('seed')||a.includes('float')||
+           a.includes('agroforestry')||a.includes('natural farm');
+  });
+  let h=tHead(['Year','Qtr','Activity','Proposed','Unit','Status','Sub-Responsibilities','Notes']);
+  ivActRows.forEach(d=>{
+    const rs=[...new Set(d.resps.filter(Boolean))];
+    h+=`<tr>
+      <td style="font-family:var(--f-m);font-size:10px">${d.year}</td>
+      <td style="font-family:var(--f-m);font-size:10px">${d.quarter}</td>
+      <td class="an">${d.activity}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${d.proposed}</td>
+      <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
+      <td><span class="badge ${d.stCls}">${d.status}</span></td>
+      <td>${rs.length?rs.map(r=>`<span class="rtag">${r}</span>`).join(''):'<span style="color:var(--text-m)">—</span>'}</td>
+      <td style="font-size:11.5px;color:var(--ink3)">${d.notes||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('ivTable').innerHTML=h+'</tbody></table>';
+}
+
+/* ══════════════════════════════════════════════════
+   FPO TAB
+══════════════════════════════════════════════════ */
+function drawFPOTab(){
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const fA=S(d=>d.fMA)||0;
+
+  document.getElementById('fpoRow').innerHTML=[
+    {v:fA||'—',l:'Members Enrolled'},
+    {v:'3',l:'FPOs to Establish'},
+    {v:fA>0?Math.round(fA/450*100)+'%':'—',l:'Enrolment Progress'},
+    {v:'Y1 Q4',l:'CEO Hiring Target'},
+    {v:S(d=>d.incPctA)>0?S(d=>d.incPctA).toFixed(1)+'%':'—',l:'Income Increase Achieved'},
+    {v:'30–40%',l:'Income Increase Target'}
+  ].map(x=>`<div class="mk"><div class="mkv">${x.v}</div><div class="mkl">${x.l}</div></div>`).join('');
+
+  // FPO membership by block
+  const el1=document.getElementById('fpoChart');
+  if(charts.fpo) charts.fpo.dispose();
+  charts.fpo=echarts.init(el1);
+  charts.fpo.setOption(lOpts({
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'4%',right:'4%',bottom:'12%',top:'16%',containLabel:true},
+    xAxis:{type:'category',data:['Dandari (B1)','Matihani (B2)','Khudabandpur (B3)','Total'],axisLabel:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    yAxis:{type:'value',name:'Members',nameTextStyle:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Target',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:[150,150,150,450],barMaxWidth:26},
+      {name:'Enrolled',type:'bar',itemStyle:{color:'#2E5E3E',borderRadius:[2,2,0,0]},data:[fA>0?Math.min(fA,150):0,0,0,fA||0],barMaxWidth:26}
+    ]
+  }));
+
+  // Yield & income targets
+  const el2=document.getElementById('outChart');
+  if(charts.out) charts.out.dispose();
+  charts.out=echarts.init(el2);
+  charts.out.setOption(lOpts({
+    tooltip:{trigger:'axis'},
+    legend:{top:6,textStyle:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    grid:{left:'10%',right:'4%',bottom:'12%',top:'16%'},
+    xAxis:{type:'category',data:['Income Increase','Yield Increase','Women %','FPO Viability'],axisLabel:{fontFamily:'Figtree',fontSize:11,color:'#3D3626'}},
+    yAxis:{type:'value',name:'%',max:100,axisLabel:{fontFamily:'Space Mono',fontSize:9,color:'#8A7E6E',formatter:'{value}%'},splitLine:{lineStyle:{color:'#EDE8DE'}}},
+    series:[
+      {name:'Target',type:'bar',barGap:0,itemStyle:{color:'#C8C0AE',borderRadius:[2,2,0,0]},data:[40,50,50,80],barMaxWidth:26},
+      {name:'Current',type:'bar',itemStyle:{color:'#B5751E',borderRadius:[2,2,0,0]},data:[
+        S(d=>d.incPctA)>0?+(S(d=>d.incPctA)/Math.max(D.filter(d=>d.incPctA>0).length,1)).toFixed(1):0,
+        0,
+        S(d=>d.wBA)>0?Math.round(S(d=>d.wBA)/(S(d=>d.dBA)||1)*100):0,
+        fA>0?Math.min(Math.round(fA/450*100),100):0
+      ],barMaxWidth:26}
+    ]
+  }));
+
+  // FPO activity register
+  const fpoActRows=D.filter(d=>{
+    const a=d.activity.toLowerCase();
+    return a.includes('fpo')||a.includes('ceo recruitment');
+  });
+  let h=tHead(['Year','Qtr','Activity','Proposed','Unit','Status','Sub-Responsibilities','Notes']);
+  fpoActRows.forEach(d=>{
+    const rs=[...new Set(d.resps.filter(Boolean))];
+    h+=`<tr>
+      <td style="font-family:var(--f-m);font-size:10px">${d.year}</td>
+      <td style="font-family:var(--f-m);font-size:10px">${d.quarter}</td>
+      <td class="an">${d.activity}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${d.proposed}</td>
+      <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
+      <td><span class="badge ${d.stCls}">${d.status}</span></td>
+      <td>${rs.length?rs.map(r=>`<span class="rtag">${r}</span>`).join(''):'<span style="color:var(--text-m)">—</span>'}</td>
+      <td style="font-size:11.5px;color:var(--ink3)">${d.notes||'—'}</td>
+    </tr>`;
+  });
+  document.getElementById('fpoTable').innerHTML=h+'</tbody></table>';
+}
+
+/* ══════════════════════════════════════════════════
+   MAP
+══════════════════════════════════════════════════ */
+function initMap(){
+  const el=document.getElementById('mapEl');
+  if(!el||el.offsetHeight===0) return;
+  if(map){map.remove();map=null;}
+  map=L.map('mapEl').setView([25.42,86.12],11);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:19}).addTo(map);
+  refreshMap();
+}
+function refreshMap(){
+  if(!map) return;
+  markers.forEach(m=>m.remove()); markers=[];
+  const bf=document.getElementById('mapBlock').value;
+  const yf=document.getElementById('mapYear').value;
+  const fd=D.filter(d=>(bf==='all'||d.block===bf)&&(yf==='all'||d.year===yf));
+
+  for(let i=1;i<=45;i++){
+    const vn='Village '+i; const co=VC[vn];
+    if(!co) continue;
+    if(bf!=='all'&&co.block!==bf) continue;
+    const va=fd.filter(d=>d.village===vn);
+    const done=va.filter(d=>d.achieved>0);
+    const isI=done.length>0||i<=15;
+    const hasF=va.some(d=>d.activity.toLowerCase().includes('float'));
+    const hasA=va.some(d=>d.activity.toLowerCase().includes('agro processing'));
+    const hasAF=va.some(d=>d.activity.toLowerCase().includes('agroforestry')||d.activity.toLowerCase().includes('natural farm'));
+
+    const col=isI&&done.length>0?'#2E5E3E':isI?'#5A7E62':'#3A6F94';
+    const sz=isI?17:12;
+    const mk=L.marker([co.lat,co.lng],{icon:L.divIcon({
+      html:`<div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${col};border:2px solid rgba(255,255,255,.8);box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,
+      className:'',iconAnchor:[sz/2,sz/2]
+    })}).addTo(map);
+    const doneTags=done.map(d=>`<span class="pt pd">${d.activity.slice(0,35)}</span>`).join('');
+    const planTags=va.filter(d=>!d.achieved).slice(0,3).map(d=>`<span class="pt pp">${d.activity.slice(0,35)}</span>`).join('');
+    mk.bindPopup(`<div class="pn">🏘 ${vn}</div>
+      <div style="font-size:11px;color:#777;margin-bottom:6px">📍 ${co.bn} · ${co.lat.toFixed(5)}, ${co.lng.toFixed(5)}</div>
+      ${done.length?`<strong style="font-size:11px">✅ Done:</strong><br>${doneTags}<hr class="phr">`:'' }
+      ${planTags?`<strong style="font-size:11px">🔵 Planned:</strong><br>${planTags}<hr class="phr">`:'' }
+      <div style="font-size:11px;color:#999">${done.length} done / ${va.length} planned${hasF?' · 🚤 Float':''}${hasA?' · 🏭 APU':''}${hasAF?' · 🌳 Farm':''}</div>`,
+    {maxWidth:340});
+    mk.bindTooltip(`<strong>${vn}</strong>${done.length?' — '+done.slice(0,2).map(d=>d.activity.split(' ').slice(0,2).join(' ')).join(', '):''}`,{direction:'top',offset:[0,-8]});
+    markers.push(mk);
+
+    if(hasF){const m=L.circleMarker([co.lat+.003,co.lng+.002],{radius:6,color:'#B5751E',fillColor:'#B5751E',fillOpacity:.85,weight:2}).addTo(map);m.bindTooltip('Float Farm — '+vn);markers.push(m);}
+    if(hasA){const m=L.circleMarker([co.lat-.003,co.lng-.002],{radius:7,color:'#A83030',fillColor:'#A83030',fillOpacity:.85,weight:2}).addTo(map);m.bindTooltip('APU — '+vn);markers.push(m);}
+    if(hasAF){const m=L.circleMarker([co.lat+.002,co.lng-.003],{radius:6,color:'#5A7E62',fillColor:'#5A7E62',fillOpacity:.75,weight:2}).addTo(map);m.bindTooltip('Farm — '+vn);markers.push(m);}
+    if(isI&&done.length>0){
+      for(let p=0;p<3;p++){
+        const m=L.circleMarker([co.lat+(Math.random()-.5)*.007,co.lng+(Math.random()-.5)*.007],{radius:4,color:'#C4722A',fillColor:'#C4722A',fillOpacity:.7,weight:1}).addTo(map);
+        m.bindTooltip('Beneficiary Plot '+(p+1)+' — '+vn);markers.push(m);
+      }
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   LAT/LNG EDITOR
+══════════════════════════════════════════════════ */
+function buildLLGrid(){
+  const g=document.getElementById('llGrid');
+  g.innerHTML=Object.keys(VC).map(vn=>`
+    <div class="ll-row">
+      <label>${vn}</label>
+      <input id="lat_${vn.replace(/ /g,'_')}" placeholder="Lat" value="${VC[vn].lat!==undefined&&VC[vn].lat!==0?VC[vn].lat.toFixed(5):''}">
+      <input id="lng_${vn.replace(/ /g,'_')}" placeholder="Lng" value="${VC[vn].lng!==undefined&&VC[vn].lng!==0?VC[vn].lng.toFixed(5):''}">
+    </div>`).join('');
+}
+function applyCoords(){
+  Object.keys(VC).forEach(vn=>{
+    const key=vn.replace(/ /g,'_');
+    const latEl=document.getElementById('lat_'+key);
+    const lngEl=document.getElementById('lng_'+key);
+    if(latEl&&lngEl){
+      const lat=parseFloat(latEl.value);
+      const lng=parseFloat(lngEl.value);
+      if(!isNaN(lat)&&!isNaN(lng)&&lat!==0&&lng!==0){VC[vn].lat=lat;VC[vn].lng=lng;}
+    }
+  });
+  if(map){map.remove();map=null;}
+  initMap();
+  showAlert('ok','Coordinates updated and map refreshed.');
+}
+function exportCoordsCSV(){
+  let csv='Village,Block,Latitude,Longitude\n';
+  Object.entries(VC).forEach(([vn,co])=>{csv+=`${vn},${co.block},${co.lat},${co.lng}\n`;});
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='FERTILE_Coordinates.csv'; a.click();
+}
+
+/* ══════════════════════════════════════════════════
+   GANTT
+══════════════════════════════════════════════════ */
+function setGY(el,yr){
+  ganttY=yr;
+  document.querySelectorAll('.yp').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  drawGantt();
+}
+function drawGantt(){
+  const filt=ganttY==='all'?D:D.filter(d=>d.year===ganttY);
+  const seen=new Set();
+  const uniq=filt.filter(d=>{if(seen.has(d.activity))return false;seen.add(d.activity);return true;});
+  uniq.sort((a,b)=>a.startM-b.startM);
+  const yCol={'Y1':'#2E5E3E','Y2':'#B5751E','Y3':'#3A6F94'};
+  const months=Array.from({length:36},(_,i)=>`Y${Math.floor(i/12)+1}M${String(i%12+1).padStart(2,'0')}`);
+  const el=document.getElementById('ganttChart');
+  if(charts.gantt) charts.gantt.dispose();
+  charts.gantt=echarts.init(el);
+  charts.gantt.setOption(lOpts({
+    tooltip:{formatter:p=>{
+      const[ri,s,e,pct,st]=p.value; const a=uniq[ri];
+      const rs=[...new Set(a.resps.filter(Boolean))];
+      return `<strong style="font-family:Fraunces,serif;font-size:14px">${a.activity.slice(0,52)}</strong><br>${a.year} ${a.quarter} · Months ${s+1}–${e}<br>Status: ${st} · ${pct.toFixed(0)}%${rs.length?'<br>👤 '+rs.slice(0,3).join(' · '):''}`;
+    }},
+    grid:{left:'4%',right:'3%',bottom:'3%',top:'4%',containLabel:true},
+    xAxis:{type:'category',data:months,axisLabel:{fontFamily:'Space Mono',fontSize:8,interval:2,color:'#8A7E6E'},splitLine:{show:true,lineStyle:{color:'#EDE8DE'}}},
+    yAxis:{type:'category',inverse:true,data:uniq.map(d=>d.activity.length>60?d.activity.slice(0,60)+'…':d.activity),axisLabel:{interval:0,width:400,overflow:'break',lineHeight:14,fontSize:10,fontFamily:'Figtree',color:'#3D3626'}},
+    series:[{
+      type:'custom',
+      renderItem(params,api){
+        const ri=api.value(0),xs=api.value(1),xe=api.value(2),pct=api.value(3);
+        const s=api.coord([xs,ri]),e=api.coord([xe,ri]);
+        const bh=Math.max(api.size([0,1])[1]*.52,11);
+        const x=s[0],y=s[1]-bh/2,w=e[0]-s[0];
+        const col=yCol[uniq[ri]?.year]||'#2E5E3E';
+        const ach=uniq[ri]?.achieved||0;
+        return{type:'group',children:[
+          {type:'rect',shape:{x,y,width:w,height:bh},style:{fill:col,opacity:ach>0?0.85:0.3}},
+          {type:'rect',shape:{x,y,width:w*(pct/100),height:bh},style:{fill:'rgba(255,255,255,.35)'}}
+        ]};
+      },
+      data:uniq.map((d,i)=>({value:[i,d.startM-1,Math.min(d.startM-1+d.duration,36),d.pct,d.status]})),
+      encode:{x:[1,2],y:0}
+    }]
+  }));
+}
+
+/* ══════════════════════════════════════════════════
+   QUARTERLY TABLE
+══════════════════════════════════════════════════ */
+function drawQtrTable(){
+  const yr=document.getElementById('yrTrack').value;
+  const fd=D.filter(d=>d.year===yr);
+  let h=tHead(['Quarter','Activities','Proposed','Achieved','Completion %','Beneficiaries','Trained','Awareness','Cap. Bldg','Villages','Status']);
+  ['Q1','Q2','Q3','Q4'].forEach(q=>{
+    const qd=fd.filter(d=>d.quarter===q);
+    const p=qd.reduce((s,d)=>s+d.proposed,0);
+    const a=qd.reduce((s,d)=>s+d.achieved,0);
+    const pct=p>0?(a/p*100):0;
+    const vs=[...new Set(qd.map(d=>d.village).filter(Boolean))].length;
+    let cls='b-none',st='Not Started';
+    if(p>0&&qd.some(d=>d.achieved>0)){if(pct>=80){st='On Track';cls='b-on';}else if(pct>=40){st='At Risk';cls='b-risk';}else{st='Critical';cls='b-crit';}}
+    const bc=pct>=80?'#2E5E3E':pct>=40?'#B5751E':'#A83030';
+    h+=`<tr>
+      <td><strong style="font-family:var(--f-m);font-size:11px">${yr} ${q}</strong></td>
+      <td style="font-family:var(--f-m);font-size:11px">${qd.length}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${p.toLocaleString()}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${a.toLocaleString()}</td>
+      <td><div style="display:flex;align-items:center;gap:7px">
+        <div class="mb" style="width:70px"><div class="mbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+        <span style="font-family:var(--f-m);font-size:10.5px;font-weight:700;color:${bc}">${pct.toFixed(1)}%</span>
+      </div></td>
+      <td style="font-family:var(--f-m);font-size:11px">${qd.reduce((s,d)=>s+d.dBA,0)||'—'}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${qd.reduce((s,d)=>s+d.trA,0)||'—'}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${qd.reduce((s,d)=>s+d.awA,0)||'—'}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${qd.reduce((s,d)=>s+d.cbA,0)||'—'}</td>
+      <td style="font-family:var(--f-m);font-size:11px">${vs}</td>
+      <td><span class="badge ${cls}">${st}</span></td>
+    </tr>`;
+  });
+  document.getElementById('qtrTable').innerHTML=h+'</tbody></table>';
+}
+
+/* ══════════════════════════════════════════════════
+   VILLAGE TABLE
+══════════════════════════════════════════════════ */
+function drawVillageTable(){
+  const bf=document.getElementById('vBlock').value;
+  let h=tHead(['Village','Block','Interventions','Activities','Survey','Docs','Lat/Lng']);
+  for(let i=1;i<=45;i++){
+    const vn='Village '+i,co=VC[vn];
+    if(!co) continue;
+    if(bf!=='all'&&co.block!==bf) continue;
+    const acts=D.filter(d=>d.village===vn);
+    const done=acts.filter(d=>d.achieved>0);
+    const phOk=done.filter(d=>d.photos).length;
+    const tags=[...new Set(done.map(d=>{
+      const a=d.activity.toLowerCase();
+      if(a.includes('float'))return'🚤 Float';if(a.includes('agroforestry'))return'🌳 AF';
+      if(a.includes('natural farm'))return'🌱 INF';if(a.includes('agro processing'))return'🏭 APU';
+      if(a.includes('capacity'))return'📚 CB';if(a.includes('awareness'))return'📢 Aw';
+      if(a.includes('pgs'))return'🏆 PGS';if(a.includes('seed'))return'🌾 Seed';
+      if(a.includes('baseline'))return'📋 BL';return'📌';
+    }))].join(' ');
+    const ss=i<=12?'✅ Done':i<=30?'⚡ Active':'⬜ Planned';
+    const hasCoords=co.lat&&co.lng;
+    h+=`<tr>
+      <td><strong>${vn}</strong></td>
+      <td style="font-family:var(--f-m);font-size:10px">${co.bn}</td>
+      <td style="font-size:12px">${tags||'—'}</td>
+      <td><span class="badge ${done.length?'b-on':'b-none'}">${done.length}/${acts.length}</span></td>
+      <td style="font-size:12px">${ss}</td>
+      <td style="font-size:12px">${done.length?(phOk?'✅ '+phOk:'⚠ Pending'):'—'}</td>
+      <td style="font-family:var(--f-m);font-size:9.5px;color:var(--text-m)">${hasCoords?co.lat.toFixed(4)+', '+co.lng.toFixed(4):'<span style="color:#A83030">Enter coords ↑</span>'}</td>
+    </tr>`;
+  }
+  document.getElementById('vilTable').innerHTML=h+'</tbody></table>';
+}
+
+/* ══════════════════════════════════════════════════
+   ACTIVITY TABLE + FILTERS
+══════════════════════════════════════════════════ */
+function populateRespFilter(){
+  const all=[...new Set(D.flatMap(d=>d.resps.filter(Boolean)))].sort();
+  const sel=document.getElementById('fResp');
+  sel.innerHTML='<option value="all">All Responsibility</option>'+all.map(r=>`<option value="${r}">${r}</option>`).join('');
+}
+function filterActs(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  const yr=document.getElementById('fYr').value;
+  const qtr=document.getElementById('fQtr').value;
+  const resp=document.getElementById('fResp').value;
+  const st=document.getElementById('fSt').value;
+  let f=D;
+  if(q) f=f.filter(d=>d.activity.toLowerCase().includes(q)||(d.village||'').toLowerCase().includes(q)||d.subs.some(s=>s.toLowerCase().includes(q))||(d.notes||'').toLowerCase().includes(q));
+  if(yr!=='all')   f=f.filter(d=>d.year===yr);
+  if(qtr!=='all')  f=f.filter(d=>d.quarter===qtr);
+  if(resp!=='all') f=f.filter(d=>d.resps.includes(resp));
+  if(st!=='all')   f=f.filter(d=>d.status===st);
+  drawActTable(f);
+}
+function drawActTable(data){
+  let h=tHead(['Period','Activity','Sub-Activities','Unit','Proposed','Achieved','Progress','📸','Status']);
+  data.forEach(d=>{
+    const subH=d.subs.length
+      ?d.subs.slice(0,3).map((s,i)=>`<span class="sc" onclick="openModal(${d.id})" title="${s}${d.resps[i]?' ['+d.resps[i]+']':''}">${s.length>26?s.slice(0,26)+'…':s}</span>`).join('')
+        +(d.subs.length>3?`<span class="sc sc-more" onclick="openModal(${d.id})">+${d.subs.length-3}</span>`:'')
+      :'<span style="color:var(--text-m);font-size:11px">—</span>';
+    const pct=d.proposed>0?(d.achieved/d.proposed*100):0;
+    const bc=pct>=80?'#2E5E3E':pct>=40?'#B5751E':'#A83030';
+    h+=`<tr>
+      <td style="white-space:nowrap;font-family:var(--f-m);font-size:10px"><strong>${d.year} ${d.quarter}</strong></td>
+      <td class="an" style="max-width:180px">${d.activity}</td>
+      <td style="max-width:210px">${subH}</td>
+      <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
+      <td style="font-family:var(--f-m);font-size:11px"><strong>${d.proposed}</strong></td>
+      <td style="font-family:var(--f-m);font-size:11px">${d.achieved}</td>
+      <td><div style="display:flex;align-items:center;gap:5px;min-width:72px">
+        <div class="mb" style="width:50px"><div class="mbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+        <span style="font-size:10px;font-weight:700;font-family:var(--f-m);color:${bc}">${pct.toFixed(0)}%</span>
+      </div></td>
+      <td style="font-size:13px">${d.photos?'✅':'—'}</td>
+      <td><span class="badge ${d.stCls}">${d.status}</span></td>
+    </tr>`;
+  });
+  document.getElementById('actTable').innerHTML=h+'</tbody></table>';
+}
+
+/* ══════════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════════ */
+function openModal(id){
+  const d=D.find(x=>x.id===id); if(!d) return;
+  document.getElementById('mTitle').textContent=d.activity;
+  document.getElementById('mPeriod').textContent=`${d.year} · ${d.quarter} · ${d.village||'—'} · ${d.block||''}`;
+  const steps=d.subs.length?d.subs:['No sub-activities defined.'];
+  document.getElementById('mBody').innerHTML=
+    steps.map((s,i)=>`<div class="step">
+      <div class="sn">${i+1}</div>
+      <div class="sbody">
+        <div class="stxt">${s}</div>
+        ${d.resps[i]?`<div class="sresp">👤 ${d.resps[i]}</div>`:''}
+      </div>
+    </div>`).join('')+
+    (d.notes?`<div class="mnote">📝 ${d.notes}</div>`:'');
+  document.getElementById('modalBg').classList.remove('off');
+}
+function closeModal(){document.getElementById('modalBg').classList.add('off');}
+function maybeClose(e){if(e.target===document.getElementById('modalBg'))closeModal();}
+
+/* ══════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════ */
+function tHead(cols){return `<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;}
+function lOpts(o){return Object.assign({backgroundColor:'transparent'},o);}
+function showAlert(t,m){
+  const id=t==='err'?'aErr':'aOk';
+  const el=document.getElementById(id);
+  el.textContent=m;el.style.display='block';
+  setTimeout(()=>el.style.display='none',6000);
+}
+window.addEventListener('resize',()=>{
+  Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}});
+  if(map)map.invalidateSize();
+});
+</script>
+</body>
+</html>
