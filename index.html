@@ -255,6 +255,163 @@ tbody tr:last-child td{border-bottom:none}
 
 /* ── RESP TAG ── */
 .rtag{background:rgba(46,94,62,.1);color:var(--forest);padding:2px 8px;font-family:var(--f-m);font-size:9.5px;display:inline-block;margin:1px 2px;border-radius:2px;border:1px solid rgba(46,94,62,.18)}
+
+/* ── INLINE EDIT ── */
+.ed-cell{position:relative}
+.ed-cell input,.ed-cell select,.ed-cell textarea{
+  background:var(--bg);border:1.5px solid var(--gold2);
+  color:var(--ink);font-family:var(--f-m);font-size:10.5px;
+  padding:3px 6px;border-radius:3px;width:100%;outline:none;
+}
+.ed-cell textarea{resize:vertical;min-height:40px;font-size:11px;font-family:var(--f-b)}
+.dirty-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;margin-left:5px;vertical-align:middle}
+.save-pulse{animation:savePulse .6s ease}
+@keyframes savePulse{0%{background:var(--card)}50%{background:rgba(46,94,62,.12)}100%{background:var(--card)}}
+
+/* ── TOOLBAR ABOVE ACTIVITY TABLE ── */
+.act-toolbar{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+  padding:10px 20px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--line);
+}
+.act-toolbar-left{display:flex;gap:8px;align-items:center}
+.toolbar-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 14px;font-family:var(--f-m);font-size:9.5px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  border:1.5px solid;cursor:pointer;border-radius:3px;transition:.14s;
+  background:transparent;
+}
+.tb-green{border-color:var(--forest);color:var(--forest)}
+.tb-green:hover{background:var(--forest);color:#fff}
+.tb-gold{border-color:var(--gold2);color:var(--gold)}
+.tb-gold:hover{background:var(--gold2);color:var(--forest2)}
+.tb-sky{border-color:var(--sky);color:var(--sky)}
+.tb-sky:hover{background:var(--sky);color:#fff}
+.tb-rust{border-color:var(--rust);color:var(--rust)}
+.tb-rust:hover{background:var(--rust);color:#fff}
+.edit-mode-badge{
+  font-family:var(--f-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  background:var(--amber);color:#fff;padding:3px 10px;border-radius:2px;
+  display:none;
+}
+.edit-mode-badge.on{display:inline-block}
+.auto-save-lbl{font-family:var(--f-m);font-size:9px;color:var(--text-m);letter-spacing:.06em}
+.gs-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gs-inp{padding:6px 10px;border:1.5px solid var(--line2);background:var(--card);font-family:var(--f-m);font-size:10px;color:var(--ink);border-radius:3px;width:340px;outline:none}
+.gs-inp:focus{border-color:var(--sky)}
+.map-filter-note{
+  font-family:var(--f-m);font-size:9px;color:var(--forest);
+  background:rgba(46,94,62,.08);border:1px solid rgba(46,94,62,.2);
+  padding:4px 12px;border-radius:2px;display:none;
+  align-items:center;gap:8px;
+}
+.map-filter-note.on{display:inline-flex}
+
+/* ── PHOTO WIDGET ── */
+.photo-widget{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.photo-thumb{
+  width:44px;height:44px;object-fit:cover;
+  border-radius:3px;border:1px solid var(--line2);cursor:pointer;
+  transition:transform .15s;
+}
+.photo-thumb:hover{transform:scale(1.08)}
+.photo-add{
+  width:44px;height:44px;border:1.5px dashed var(--line2);
+  border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--text-m);cursor:pointer;
+  transition:border-color .14s,color .14s;
+}
+.photo-add:hover{border-color:var(--gold2);color:var(--gold2)}
+
+/* ── NARRATIVE BOX ── */
+.narrative-box{
+  background:var(--card);border:1px solid var(--line);
+  padding:18px 22px;margin-bottom:18px;
+  border-left:4px solid var(--forest);
+  font-family:var(--f-b);font-size:13px;line-height:1.75;
+  color:var(--ink2);
+}
+.narrative-box h4{
+  font-family:var(--f-d);font-size:15px;color:var(--ink);
+  margin-bottom:10px;font-weight:600;
+}
+.nar-tag{
+  display:inline-block;padding:1px 8px;border-radius:2px;
+  font-family:var(--f-m);font-size:9.5px;font-weight:700;
+  margin:0 2px;
+}
+.nar-warn{background:rgba(168,48,48,.1);color:var(--rust)}
+.nar-ok{background:rgba(46,94,62,.1);color:var(--forest)}
+.nar-amb{background:rgba(196,114,42,.1);color:var(--amber)}
+
+/* ── RISK HEATMAP ── */
+.heatmap-wrap{padding:20px}
+.heatmap-grid{
+  display:grid;
+  grid-template-columns:28px 1fr 1fr;
+  grid-template-rows:1fr 1fr 28px;
+  gap:8px;
+  height:360px;
+  font-family:var(--f-m);font-size:10px;
+}
+.hm-cell{
+  border-radius:4px;padding:10px;
+  display:flex;flex-direction:column;
+  gap:4px;overflow-y:auto;
+}
+.hm-cell.high-high{background:rgba(168,48,48,.18);border:1px solid rgba(168,48,48,.3)}
+.hm-cell.high-low {background:rgba(196,114,42,.14);border:1px solid rgba(196,114,42,.25)}
+.hm-cell.low-high {background:rgba(181,117,30,.12);border:1px solid rgba(181,117,30,.2)}
+.hm-cell.low-low  {background:rgba(46,94,62,.08);border:1px solid rgba(46,94,62,.15)}
+.hm-ax-v{display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg);
+  font-family:var(--f-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-m);}
+.hm-ax-h{display:flex;align-items:center;justify-content:center;
+  font-family:var(--f-m);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text-m);}
+.hm-item{
+  background:var(--card);border:1px solid var(--line);
+  padding:3px 8px;font-size:10.5px;color:var(--ink2);
+  border-radius:2px;line-height:1.35;
+}
+.hm-corner{background:transparent}
+.hm-label-row{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px}
+
+/* ── PDF REPORT ── */
+.report-modal-body{padding:24px;max-height:70vh;overflow-y:auto}
+.report-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.report-section:last-child{border-bottom:none}
+.report-section h5{font-family:var(--f-d);font-size:14px;color:var(--ink);margin-bottom:8px}
+.report-kpi-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.r-kpi{background:var(--bg2);padding:8px 14px;border-radius:3px;font-family:var(--f-m);font-size:10.5px;color:var(--ink2)}
+.r-kpi strong{color:var(--ink);display:block;font-size:14px}
+
+/* ── GOOGLE SHEETS PANEL ── */
+.gs-panel{
+  background:var(--card);border:1px solid var(--line);
+  padding:18px 22px;margin-bottom:18px;
+}
+.gs-panel-title{font-family:var(--f-d);font-size:15px;color:var(--ink);margin-bottom:12px}
+.gs-status{font-family:var(--f-m);font-size:10px;color:var(--text-m);margin-top:8px}
+.gs-status.ok{color:var(--forest)}.gs-status.err{color:var(--rust)}
+
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10000;display:flex;align-items:center;justify-content:center}
+.lightbox.off{display:none}
+.lightbox img{max-width:90vw;max-height:88vh;border-radius:4px;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.lb-close{position:absolute;top:18px;right:22px;color:#fff;font-size:28px;cursor:pointer;line-height:1;background:rgba(0,0,0,.4);padding:2px 10px;border-radius:4px}
+
+/* ── KPI DRILL ── */
+.kpi{cursor:pointer}
+.kpi:hover .kpi-v{text-decoration:underline;text-decoration-color:var(--gold2);text-underline-offset:3px}
+
+/* ── GANTT DEPS ── */
+.gantt-dep-toggle{font-family:var(--f-m);font-size:9.5px;color:var(--text-m);display:flex;align-items:center;gap:6px;cursor:pointer}
+.gantt-dep-toggle input{accent-color:var(--forest)}
 </style>
 </head>
 <body>
@@ -289,10 +446,23 @@ tbody tr:last-child td{border-bottom:none}
     <div class="wc-tag">Monitoring &amp; Evaluation Platform</div>
     <h1 class="wc-h">FERTILE<br><em>Field Dashboard</em></h1>
     <p class="wc-p">Farmer Empowerment Through Resilient Technologies, Integrated Livelihoods &amp; Ecological Solutions — Begusarai District, Bihar</p>
-    <button class="wc-btn" onclick="document.getElementById('fi').click()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      Upload Project CSV
-    </button>
+
+    <!-- Google Sheets option on welcome -->
+    <div style="margin:20px auto 0;max-width:560px;background:var(--bg2);border:1px solid var(--line);padding:16px 20px;border-radius:4px">
+      <div style="font-family:var(--f-m);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-m);margin-bottom:10px">🔗 Or connect a live Google Sheet</div>
+      <div class="gs-row">
+        <input class="gs-inp" id="gsUrl" placeholder="Paste published Google Sheets CSV URL…">
+        <button class="toolbar-btn tb-sky" onclick="loadGoogleSheet()">Fetch</button>
+      </div>
+      <div class="gs-status" id="gsStatus">Publish your sheet: File → Share → Publish to web → CSV → copy link</div>
+    </div>
+
+    <div style="margin-top:24px">
+      <button class="wc-btn" onclick="document.getElementById('fi').click()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload Project CSV
+      </button>
+    </div>
     <div class="wc-stats">
       <div><div class="ws-n">2,400</div><div class="ws-l">Direct Beneficiaries</div></div>
       <div><div class="ws-n">45</div><div class="ws-l">Survey Villages</div></div>
@@ -306,6 +476,12 @@ tbody tr:last-child td{border-bottom:none}
   <div id="dash" style="display:none">
     <div id="riskBanner" class="risk hidden">⚠&ensp;<strong>Flags —</strong>&ensp;<span id="riskTxt"></span></div>
 
+    <!-- AUTOMATED NARRATIVE -->
+    <div id="narrativeBox" class="narrative-box" style="display:none">
+      <h4>📋 Project Status Summary <span style="font-family:var(--f-m);font-size:9.5px;color:var(--text-m);font-weight:normal;margin-left:8px" id="narrativeTs"></span></h4>
+      <div id="narrativeTxt"></div>
+    </div>
+
     <div class="tab-bar">
       <button class="tab-btn active" onclick="tab('ov',this)">Overview</button>
       <button class="tab-btn" onclick="tab('bn',this)">Beneficiaries</button>
@@ -314,6 +490,7 @@ tbody tr:last-child td{border-bottom:none}
       <button class="tab-btn" onclick="tab('gt',this)">Timeline</button>
       <button class="tab-btn" onclick="tab('iv',this)">Interventions</button>
       <button class="tab-btn" onclick="tab('fp',this)">FPO</button>
+      <button class="tab-btn" onclick="tab('rh',this)">Risk Heatmap</button>
     </div>
 
     <!-- ══ OVERVIEW ══ -->
@@ -445,6 +622,21 @@ tbody tr:last-child td{border-bottom:none}
             <select id="fSt"   onchange="filterActs()"><option value="all">All Status</option><option value="On Track">On Track</option><option value="At Risk">At Risk</option><option value="Critical">Critical</option><option value="Not Started">Not Started</option></select>
           </div>
         </div>
+        <!-- TOOLBAR -->
+        <div class="act-toolbar">
+          <div class="act-toolbar-left">
+            <button class="toolbar-btn tb-gold" onclick="toggleEditMode()">✏️ Edit Mode</button>
+            <span class="edit-mode-badge" id="editBadge">EDITING</span>
+            <button class="toolbar-btn tb-green" onclick="exportCSV()">⬇ Export CSV</button>
+            <button class="toolbar-btn tb-sky" onclick="generateReport()">📄 Generate Report</button>
+            <span class="auto-save-lbl" id="autoSaveLbl">Auto-save: on</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="map-filter-note" id="mapFilterNote">
+              🗺 Filtered by map village — <button onclick="clearMapFilter()" style="background:none;border:none;color:var(--rust);font-family:var(--f-m);font-size:9px;cursor:pointer;text-decoration:underline">Clear</button>
+            </span>
+          </div>
+        </div>
         <div class="cb"><div id="actTable" class="tw"></div></div>
       </div>
     </div>
@@ -455,11 +647,16 @@ tbody tr:last-child td{border-bottom:none}
       <div class="card">
         <div class="ch">
           <span class="ct">Project Gantt Chart</span>
-          <div class="yp-row" id="ganttPills">
-            <button class="yp active" onclick="setGY(this,'all')">All</button>
-            <button class="yp" onclick="setGY(this,'Y1')">Year 1</button>
-            <button class="yp" onclick="setGY(this,'Y2')">Year 2</button>
-            <button class="yp" onclick="setGY(this,'Y3')">Year 3</button>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <label class="gantt-dep-toggle">
+              <input type="checkbox" checked onchange="toggleDeps(this)"> Show dependency lines
+            </label>
+            <div class="yp-row" id="ganttPills">
+              <button class="yp active" onclick="setGY(this,'all')">All</button>
+              <button class="yp" onclick="setGY(this,'Y1')">Year 1</button>
+              <button class="yp" onclick="setGY(this,'Y2')">Year 2</button>
+              <button class="yp" onclick="setGY(this,'Y3')">Year 3</button>
+            </div>
           </div>
         </div>
         <div class="cb"><div id="ganttChart" class="ch760"></div></div>
@@ -530,8 +727,67 @@ tbody tr:last-child td{border-bottom:none}
       </div>
     </div>
 
+    <!-- ══ RISK HEATMAP ══ -->
+    <div id="tab-rh" class="tab-pane">
+      <div class="sec">Risk Matrix — Impact × Probability</div>
+      <div class="card">
+        <div class="ch">
+          <span class="ct">2×2 Risk Heatmap</span>
+          <span style="font-family:var(--f-m);font-size:9.5px;color:var(--text-m)">Activities placed by estimated impact and probability of delay</span>
+        </div>
+        <div class="heatmap-wrap">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span style="font-family:var(--f-m);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-m)">← Low Probability · High Probability →</span>
+          </div>
+          <!-- axis label + grid -->
+          <div style="display:flex;gap:8px">
+            <div class="hm-ax-v">Impact →</div>
+            <div style="flex:1">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+                <div style="font-family:var(--f-m);font-size:9px;text-align:center;color:var(--text-m);letter-spacing:.08em">LOW PROB</div>
+                <div style="font-family:var(--f-m);font-size:9px;text-align:center;color:var(--text-m);letter-spacing:.08em">HIGH PROB</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:8px;height:340px">
+                <div class="hm-cell high-high" id="hm-hi-hi"><div style="font-family:var(--f-m);font-size:8.5px;color:var(--rust);letter-spacing:.08em;margin-bottom:6px">HIGH IMPACT · HIGH PROB 🔴</div></div>
+                <div class="hm-cell high-low"  id="hm-lo-hi"><div style="font-family:var(--f-m);font-size:8.5px;color:var(--amber);letter-spacing:.08em;margin-bottom:6px">LOW IMPACT · HIGH PROB 🟡</div></div>
+                <div class="hm-cell low-high"  id="hm-hi-lo"><div style="font-family:var(--f-m);font-size:8.5px;color:var(--gold);letter-spacing:.08em;margin-bottom:6px">HIGH IMPACT · LOW PROB 🟠</div></div>
+                <div class="hm-cell low-low"   id="hm-lo-lo"><div style="font-family:var(--f-m);font-size:8.5px;color:var(--sage);letter-spacing:.08em;margin-bottom:6px">LOW IMPACT · LOW PROB 🟢</div></div>
+              </div>
+            </div>
+          </div>
+          <div style="font-family:var(--f-m);font-size:9px;color:var(--text-m);margin-top:12px;letter-spacing:.04em">
+            ↑ High-impact activities: Agroforestry, Float Farm, APU (directly affect livelihoods). Probability derived from current status — Critical = High Prob, At Risk = Medium.
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /dash -->
 </div><!-- /app -->
+
+<!-- REPORT MODAL -->
+<div id="reportModal" class="modal-bg off" onclick="if(event.target===this)closeReport()">
+  <div class="modal" style="max-width:720px">
+    <div class="mh">
+      <div>
+        <div class="mt">📄 Project Progress Report</div>
+        <div class="mp" id="reportDate"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="toolbar-btn tb-green" onclick="downloadReportCSV()">⬇ CSV</button>
+        <button class="toolbar-btn tb-sky" onclick="printReport()">🖨 Print / PDF</button>
+        <button class="mcl" onclick="closeReport()">✕</button>
+      </div>
+    </div>
+    <div class="report-modal-body" id="reportBody"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" class="lightbox off" onclick="closeLightbox()">
+  <span class="lb-close" onclick="closeLightbox()">✕</span>
+  <img id="lbImg" src="" alt="Photo">
+</div>
 
 <!-- MODAL -->
 <div id="modalBg" class="modal-bg off" onclick="maybeClose(event)">
@@ -605,6 +861,7 @@ let VC = JSON.parse(JSON.stringify(DEFAULT_VC));
    STATE
 ══════════════════════════════════════════════════ */
 let D=[], charts={}, map=null, markers=[], ganttY='all';
+let editMode=false, dirty=false, mapVillageFilter=null;
 const QS=['Y1Q1','Y1Q2','Y1Q3','Y1Q4','Y2Q1','Y2Q2','Y2Q3','Y2Q4','Y3Q1','Y3Q2','Y3Q3','Y3Q4'];
 
 /* ══════════════════════════════════════════════════
@@ -723,18 +980,22 @@ function process(rows){
    BOOT
 ══════════════════════════════════════════════════ */
 function boot(){
+  // Merge localStorage overrides into D
+  loadFromStorage();
   document.getElementById('spin').style.display='none';
   document.getElementById('welcome').style.display='none';
   document.getElementById('dash').style.display='block';
-  drawKPIs(); drawRisk();
+  drawKPIs(); drawRisk(); buildNarrative();
   drawSC(); populateSCFilter(); populateRespFilter();
   drawAware(); drawCB(); drawBar();
   drawBenefTab(); drawFPOTab(); drawInterventionsTab();
   drawQtrTable(); drawVillageTable();
-  drawActTable(D); drawGantt();
+  drawActTable(D); drawGantt(); drawRiskHeatmap();
   buildLLGrid();
   setTimeout(initMap,120);
   showAlert('ok','Loaded '+D.length+' activity records.');
+  // KPI click-through
+  document.getElementById('kpiGrid').addEventListener('click',kpiDrillDown);
 }
 
 /* ══════════════════════════════════════════════════
@@ -746,6 +1007,7 @@ function tab(name,btn){
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
   if(name==='mp'){if(!map)setTimeout(initMap,150);else setTimeout(()=>map.invalidateSize(),150);}
+  if(name==='rh') drawRiskHeatmap();
   if(name==='iv'||name==='fp') setTimeout(()=>Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}}),120);
   setTimeout(()=>Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}}),100);
 }
@@ -1265,7 +1527,8 @@ function refreshMap(){
       <div style="font-size:11px;color:#777;margin-bottom:6px">📍 ${co.bn} · ${co.lat.toFixed(5)}, ${co.lng.toFixed(5)}</div>
       ${done.length?`<strong style="font-size:11px">✅ Done:</strong><br>${doneTags}<hr class="phr">`:'' }
       ${planTags?`<strong style="font-size:11px">🔵 Planned:</strong><br>${planTags}<hr class="phr">`:'' }
-      <div style="font-size:11px;color:#999">${done.length} done / ${va.length} planned${hasF?' · 🚤 Float':''}${hasA?' · 🏭 APU':''}${hasAF?' · 🌳 Farm':''}</div>`,
+      <div style="font-size:11px;color:#999;margin-bottom:8px">${done.length} done / ${va.length} planned${hasF?' · 🚤 Float':''}${hasA?' · 🏭 APU':''}${hasAF?' · 🌳 Farm':''}</div>
+      <button onclick="setMapVillageFilter('${vn}')" style="background:#2E5E3E;color:#fff;border:none;padding:5px 12px;font-family:Space Mono,monospace;font-size:9.5px;font-weight:700;letter-spacing:.06em;cursor:pointer;border-radius:2px;width:100%">🔍 Filter Activities for ${vn}</button>`,
     {maxWidth:340});
     mk.bindTooltip(`<strong>${vn}</strong>${done.length?' — '+done.slice(0,2).map(d=>d.activity.split(' ').slice(0,2).join(' ')).join(', '):''}`,{direction:'top',offset:[0,-8]});
     markers.push(mk);
@@ -1326,6 +1589,7 @@ function setGY(el,yr){
   el.classList.add('active');
   drawGantt();
 }
+let showDeps=true;
 function drawGantt(){
   const filt=ganttY==='all'?D:D.filter(d=>d.year===ganttY);
   const seen=new Set();
@@ -1336,13 +1600,19 @@ function drawGantt(){
   const el=document.getElementById('ganttChart');
   if(charts.gantt) charts.gantt.dispose();
   charts.gantt=echarts.init(el);
-  charts.gantt.setOption(lOpts({
+
+  // Build gantt bar series data
+  const barData=uniq.map((d,i)=>({value:[i,d.startM-1,Math.min(d.startM-1+d.duration,36),d.pct,d.status]}));
+
+  const option=lOpts({
     tooltip:{formatter:p=>{
+      if(!p.value) return '';
       const[ri,s,e,pct,st]=p.value; const a=uniq[ri];
+      if(!a) return '';
       const rs=[...new Set(a.resps.filter(Boolean))];
       return `<strong style="font-family:Fraunces,serif;font-size:14px">${a.activity.slice(0,52)}</strong><br>${a.year} ${a.quarter} · Months ${s+1}–${e}<br>Status: ${st} · ${pct.toFixed(0)}%${rs.length?'<br>👤 '+rs.slice(0,3).join(' · '):''}`;
     }},
-    grid:{left:'4%',right:'3%',bottom:'3%',top:'4%',containLabel:true},
+    grid:{left:'4%',right:'3%',bottom:'6%',top:'4%',containLabel:true},
     xAxis:{type:'category',data:months,axisLabel:{fontFamily:'Space Mono',fontSize:8,interval:2,color:'#8A7E6E'},splitLine:{show:true,lineStyle:{color:'#EDE8DE'}}},
     yAxis:{type:'category',inverse:true,data:uniq.map(d=>d.activity.length>60?d.activity.slice(0,60)+'…':d.activity),axisLabel:{interval:0,width:400,overflow:'break',lineHeight:14,fontSize:10,fontFamily:'Figtree',color:'#3D3626'}},
     series:[{
@@ -1359,10 +1629,42 @@ function drawGantt(){
           {type:'rect',shape:{x,y,width:w*(pct/100),height:bh},style:{fill:'rgba(255,255,255,.35)'}}
         ]};
       },
-      data:uniq.map((d,i)=>({value:[i,d.startM-1,Math.min(d.startM-1+d.duration,36),d.pct,d.status]})),
+      data:barData,
       encode:{x:[1,2],y:0}
     }]
-  }));
+  });
+
+  charts.gantt.setOption(option);
+
+  // Dependency lines drawn after render using graphic overlay
+  if(showDeps){
+    setTimeout(()=>{
+      const depLines=getDepLines(uniq);
+      if(!depLines.length) return;
+      const graphicEls=depLines.map(dep=>{
+        try{
+          const fromPx=charts.gantt.convertToPixel({gridIndex:0},[dep.from.col, dep.from.row]);
+          const toPx  =charts.gantt.convertToPixel({gridIndex:0},[dep.to.col,   dep.to.row]);
+          if(!fromPx||!toPx) return null;
+          const mx=(fromPx[0]+toPx[0])/2;
+          return {type:'group',children:[
+            // horizontal segment from end of predecessor
+            {type:'polyline',shape:{points:[[fromPx[0],fromPx[1]],[mx,fromPx[1]],[mx,toPx[1]],[toPx[0],toPx[1]]]},
+              style:{stroke:'rgba(168,48,48,.45)',lineWidth:1.5,lineDash:[4,3],fill:'none'}},
+            // arrowhead
+            {type:'polygon',shape:{points:[[toPx[0]-5,toPx[1]-4],[toPx[0],toPx[1]],[toPx[0]-5,toPx[1]+4]]},
+              style:{fill:'rgba(168,48,48,.55)',stroke:'none'}}
+          ]};
+        }catch(e){return null;}
+      }).filter(Boolean);
+      if(graphicEls.length) charts.gantt.setOption({graphic:graphicEls});
+    },200);
+  }
+}
+// Toggle dep lines — attached to checkbox rendered in Gantt card header
+function toggleDeps(cb){
+  showDeps=cb.checked;
+  drawGantt();
 }
 
 /* ══════════════════════════════════════════════════
@@ -1446,42 +1748,56 @@ function populateRespFilter(){
   sel.innerHTML='<option value="all">All Responsibility</option>'+all.map(r=>`<option value="${r}">${r}</option>`).join('');
 }
 function filterActs(){
-  const q=document.getElementById('srch').value.toLowerCase();
-  const yr=document.getElementById('fYr').value;
-  const qtr=document.getElementById('fQtr').value;
-  const resp=document.getElementById('fResp').value;
-  const st=document.getElementById('fSt').value;
-  let f=D;
-  if(q) f=f.filter(d=>d.activity.toLowerCase().includes(q)||(d.village||'').toLowerCase().includes(q)||d.subs.some(s=>s.toLowerCase().includes(q))||(d.notes||'').toLowerCase().includes(q));
-  if(yr!=='all')   f=f.filter(d=>d.year===yr);
-  if(qtr!=='all')  f=f.filter(d=>d.quarter===qtr);
-  if(resp!=='all') f=f.filter(d=>d.resps.includes(resp));
-  if(st!=='all')   f=f.filter(d=>d.status===st);
-  drawActTable(f);
+  drawActTable(currentTableData());
 }
 function drawActTable(data){
-  let h=tHead(['Period','Activity','Sub-Activities','Unit','Proposed','Achieved','Progress','📸','Status']);
+  let h=tHead(['Period','Activity','Sub-Activities','Unit','Proposed','Achieved','Progress','📸/📹','Status','Notes']);
   data.forEach(d=>{
     const subH=d.subs.length
-      ?d.subs.slice(0,3).map((s,i)=>`<span class="sc" onclick="openModal(${d.id})" title="${s}${d.resps[i]?' ['+d.resps[i]+']':''}">${s.length>26?s.slice(0,26)+'…':s}</span>`).join('')
+      ?d.subs.slice(0,3).map((s,i)=>`<span class="sc" onclick="openModal(${d.id})" title="${s}${d.resps[i]?' ['+d.resps[i]+']':''}">${s.length>24?s.slice(0,24)+'…':s}</span>`).join('')
         +(d.subs.length>3?`<span class="sc sc-more" onclick="openModal(${d.id})">+${d.subs.length-3}</span>`:'')
       :'<span style="color:var(--text-m);font-size:11px">—</span>';
     const pct=d.proposed>0?(d.achieved/d.proposed*100):0;
     const bc=pct>=80?'#2E5E3E':pct>=40?'#B5751E':'#A83030';
-    h+=`<tr>
-      <td style="white-space:nowrap;font-family:var(--f-m);font-size:10px"><strong>${d.year} ${d.quarter}</strong></td>
-      <td class="an" style="max-width:180px">${d.activity}</td>
-      <td style="max-width:210px">${subH}</td>
-      <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
-      <td style="font-family:var(--f-m);font-size:11px"><strong>${d.proposed}</strong></td>
-      <td style="font-family:var(--f-m);font-size:11px">${d.achieved}</td>
-      <td><div style="display:flex;align-items:center;gap:5px;min-width:72px">
-        <div class="mb" style="width:50px"><div class="mbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
-        <span style="font-size:10px;font-weight:700;font-family:var(--f-m);color:${bc}">${pct.toFixed(0)}%</span>
-      </div></td>
-      <td style="font-size:13px">${d.photos?'✅':'—'}</td>
-      <td><span class="badge ${d.stCls}">${d.status}</span></td>
-    </tr>`;
+    const photos=d.photoData||[];
+    const photoHTML=photos.slice(0,3).map(p=>`<img class="photo-thumb" src="${p.data}" title="${p.name}" onclick="openLightbox('${p.data.replace(/'/g,"\\'")}')">`)
+      .join('')+`<div class="photo-add" onclick="addPhoto(${d.id})" title="Add photo/video">＋</div>`;
+    const photoCell=`<div class="photo-widget">${photoHTML}</div>`;
+
+    if(editMode){
+      const stOpts=['Not Started','On Track','At Risk','Critical'].map(s=>`<option${s===d.status?' selected':''}>${s}</option>`).join('');
+      h+=`<tr class="${dirty?'save-pulse':''}">
+        <td style="white-space:nowrap;font-family:var(--f-m);font-size:10px"><strong>${d.year} ${d.quarter}</strong></td>
+        <td class="an" style="max-width:170px">${d.activity}</td>
+        <td style="max-width:200px">${subH}</td>
+        <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
+        <td style="font-family:var(--f-m);font-size:11px"><strong>${d.proposed}</strong></td>
+        <td class="ed-cell"><input type="number" min="0" value="${d.achieved}" style="width:70px" onchange="cellEdit(${d.id},'achieved',this.value)"></td>
+        <td><div style="display:flex;align-items:center;gap:5px;min-width:72px">
+          <div class="mb" style="width:50px"><div class="mbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+          <span style="font-size:10px;font-weight:700;font-family:var(--f-m);color:${bc}">${pct.toFixed(0)}%</span>
+        </div></td>
+        <td>${photoCell}</td>
+        <td class="ed-cell"><select onchange="cellEdit(${d.id},'status',this.value)">${stOpts}</select></td>
+        <td class="ed-cell"><textarea rows="2" style="width:150px" onchange="cellEdit(${d.id},'notes',this.value)">${d.notes||''}</textarea></td>
+      </tr>`;
+    } else {
+      h+=`<tr>
+        <td style="white-space:nowrap;font-family:var(--f-m);font-size:10px"><strong>${d.year} ${d.quarter}</strong></td>
+        <td class="an" style="max-width:180px">${d.activity}</td>
+        <td style="max-width:210px">${subH}</td>
+        <td style="font-family:var(--f-m);font-size:10px">${d.unit}</td>
+        <td style="font-family:var(--f-m);font-size:11px"><strong>${d.proposed}</strong></td>
+        <td style="font-family:var(--f-m);font-size:11px">${d.achieved}</td>
+        <td><div style="display:flex;align-items:center;gap:5px;min-width:72px">
+          <div class="mb" style="width:50px"><div class="mbf" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+          <span style="font-size:10px;font-weight:700;font-family:var(--f-m);color:${bc}">${pct.toFixed(0)}%</span>
+        </div></td>
+        <td>${photoCell}</td>
+        <td><span class="badge ${d.stCls}">${d.status}</span></td>
+        <td style="font-size:11.5px;color:var(--ink3);max-width:160px">${d.notes||'—'}</td>
+      </tr>`;
+    }
   });
   document.getElementById('actTable').innerHTML=h+'</tbody></table>';
 }
@@ -1509,8 +1825,461 @@ function closeModal(){document.getElementById('modalBg').classList.add('off');}
 function maybeClose(e){if(e.target===document.getElementById('modalBg'))closeModal();}
 
 /* ══════════════════════════════════════════════════
-   HELPERS
+   FEATURE 1 — INLINE EDITING
 ══════════════════════════════════════════════════ */
+function toggleEditMode(){
+  editMode=!editMode;
+  document.getElementById('editBadge').classList.toggle('on',editMode);
+  drawActTable(currentTableData());
+  showAlert('ok', editMode?'Edit mode ON — click cells to update values':'Edit mode OFF');
+}
+function currentTableData(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  const yr=document.getElementById('fYr').value;
+  const qtr=document.getElementById('fQtr').value;
+  const resp=document.getElementById('fResp').value;
+  const st=document.getElementById('fSt').value;
+  let f = mapVillageFilter ? D.filter(d=>d.village===mapVillageFilter) : D;
+  if(q) f=f.filter(d=>d.activity.toLowerCase().includes(q)||d.subs.some(s=>s.toLowerCase().includes(q))||(d.notes||'').toLowerCase().includes(q));
+  if(yr!=='all')   f=f.filter(d=>d.year===yr);
+  if(qtr!=='all')  f=f.filter(d=>d.quarter===qtr);
+  if(resp!=='all') f=f.filter(d=>d.resps.includes(resp));
+  if(st!=='all')   f=f.filter(d=>d.status===st);
+  return f;
+}
+function cellEdit(id, field, val){
+  const d=D.find(x=>x.id===id); if(!d) return;
+  if(field==='achieved')  { d.achieved=parseFloat(val)||0; d.pct=d.proposed>0?(d.achieved/d.proposed*100):0; }
+  if(field==='status')    { d.status=val; d.stCls={'On Track':'b-on','At Risk':'b-risk','Critical':'b-crit','Not Started':'b-none'}[val]||'b-none'; }
+  if(field==='notes')     { d.notes=val; }
+  dirty=true;
+  saveToStorage();
+  document.getElementById('autoSaveLbl').textContent='Auto-saved ✓';
+  setTimeout(()=>document.getElementById('autoSaveLbl').textContent='Auto-save: on',2000);
+  // live-update KPIs and risk without full redraw
+  drawKPIs(); drawRisk(); buildNarrative();
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 2 — LOCALSTORAGE AUTO-SAVE
+══════════════════════════════════════════════════ */
+const LS_KEY='fertile_edits_v1';
+function saveToStorage(){
+  try{
+    const edits={};
+    D.forEach(d=>{edits[d.id]={achieved:d.achieved,status:d.status,notes:d.notes,photos:d.photos,photoData:d.photoData||[]};});
+    localStorage.setItem(LS_KEY,JSON.stringify(edits));
+  }catch(e){console.warn('localStorage save failed',e);}
+}
+function loadFromStorage(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    if(!raw) return;
+    const edits=JSON.parse(raw);
+    D.forEach(d=>{
+      if(edits[d.id]!==undefined){
+        const e=edits[d.id];
+        d.achieved=e.achieved??d.achieved;
+        d.status=e.status??d.status;
+        d.notes=e.notes??d.notes;
+        d.photos=e.photos??d.photos;
+        d.photoData=e.photoData||[];
+        d.stCls={'On Track':'b-on','At Risk':'b-risk','Critical':'b-crit','Not Started':'b-none'}[d.status]||'b-none';
+        d.pct=d.proposed>0?(d.achieved/d.proposed*100):0;
+      }
+    });
+    showAlert('ok','Restored edits from previous session.');
+  }catch(e){console.warn('localStorage load failed',e);}
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 3 — PHOTO / VIDEO UPLOAD
+══════════════════════════════════════════════════ */
+function addPhoto(id){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/*,video/*'; inp.multiple=true;
+  inp.onchange=ev=>{
+    const d=D.find(x=>x.id===id); if(!d) return;
+    if(!d.photoData) d.photoData=[];
+    const files=[...ev.target.files];
+    let done=0;
+    files.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=e2=>{
+        d.photoData.push({name:file.name,type:file.type,data:e2.target.result});
+        d.photos=true;
+        done++;
+        if(done===files.length){ saveToStorage(); drawActTable(currentTableData()); }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  inp.click();
+}
+function openLightbox(src){
+  document.getElementById('lbImg').src=src;
+  document.getElementById('lightbox').classList.remove('off');
+}
+function closeLightbox(){document.getElementById('lightbox').classList.add('off');}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 4 — KPI DRILL-DOWN
+══════════════════════════════════════════════════ */
+function kpiDrillDown(e){
+  const card=e.target.closest('.kpi'); if(!card) return;
+  const lbl=card.querySelector('.kpi-l')?.textContent||'';
+  if(lbl.includes('Beneficiar')||lbl.includes('Women')||lbl.includes('Trained')||lbl.includes('Income')){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-bn').classList.add('active');
+    document.querySelector('.tab-btn[onclick*="bn"]').classList.add('active');
+  } else if(lbl.includes('Village')){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-mp').classList.add('active');
+    document.querySelector('.tab-btn[onclick*="mp"]').classList.add('active');
+    setTimeout(()=>{if(!map)initMap();else map.invalidateSize();},150);
+  } else if(lbl.includes('FPO')){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-fp').classList.add('active');
+    document.querySelector('.tab-btn[onclick*="fp"]').classList.add('active');
+  } else if(lbl.includes('Asset')||lbl.includes('Capacity')||lbl.includes('Awareness')){
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-iv').classList.add('active');
+    document.querySelector('.tab-btn[onclick*="iv"]').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-ac').classList.add('active');
+    document.querySelector('.tab-btn[onclick*="ac"]').classList.add('active');
+  }
+  setTimeout(()=>Object.values(charts).forEach(c=>{try{c.resize()}catch(e){}}),100);
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 5 — CROSS-FILTER MAP → ACTIVITY TABLE
+══════════════════════════════════════════════════ */
+function setMapVillageFilter(vname){
+  mapVillageFilter=vname;
+  document.getElementById('mapFilterNote').classList.add('on');
+  // switch to activities tab
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-ac').classList.add('active');
+  document.querySelector('.tab-btn[onclick*="ac"]').classList.add('active');
+  filterActs();
+}
+function clearMapFilter(){
+  mapVillageFilter=null;
+  document.getElementById('mapFilterNote').classList.remove('on');
+  filterActs();
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 6 — ONE-CLICK REPORT
+══════════════════════════════════════════════════ */
+function generateReport(){
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const now=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('reportDate').textContent='Generated: '+now;
+  const tP=S(d=>d.proposed),tA=S(d=>d.achieved);
+  const pct=tP>0?(tA/tP*100):0;
+  const crit=D.filter(d=>d.status==='Critical');
+  const risk=D.filter(d=>d.status==='At Risk');
+  const onT=D.filter(d=>d.status==='On Track');
+  const notS=D.filter(d=>d.status==='Not Started');
+  let html=`
+    <div class="report-section">
+      <h5>📊 Executive Summary</h5>
+      <div class="report-kpi-row">
+        <div class="r-kpi"><strong>${pct.toFixed(1)}%</strong>Overall Progress</div>
+        <div class="r-kpi"><strong>${onT.length}</strong>On Track</div>
+        <div class="r-kpi"><strong>${risk.length}</strong>At Risk</div>
+        <div class="r-kpi"><strong>${crit.length}</strong>Critical</div>
+        <div class="r-kpi"><strong>${notS.length}</strong>Not Started</div>
+        <div class="r-kpi"><strong>${D.length}</strong>Total Activities</div>
+      </div>
+      <div class="narrative-box" style="margin:0">${document.getElementById('narrativeTxt').innerHTML||'No narrative generated.'}</div>
+    </div>`;
+
+  // Quarter breakdown
+  html+=`<div class="report-section"><h5>📅 Quarter-wise Progress</h5>`;
+  ['Y1','Y2','Y3'].forEach(yr=>{
+    ['Q1','Q2','Q3','Q4'].forEach(q=>{
+      const qd=D.filter(d=>d.year===yr&&d.quarter===q);
+      if(!qd.length) return;
+      const qp=qd.reduce((s,d)=>s+d.proposed,0);
+      const qa=qd.reduce((s,d)=>s+d.achieved,0);
+      const qpct=qp>0?(qa/qp*100):0;
+      const c=qpct>=80?'#2E5E3E':qpct>=40?'#B5751E':'#A83030';
+      html+=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-family:var(--f-m);font-size:10.5px;width:60px">${yr} ${q}</span>
+        <div class="mb" style="width:200px"><div class="mbf" style="width:${Math.min(qpct,100)}%;background:${c}"></div></div>
+        <span style="font-family:var(--f-m);font-size:10.5px;color:${c}">${qpct.toFixed(1)}%</span>
+        <span style="font-size:11.5px;color:var(--ink3)">${qd.length} activities</span>
+      </div>`;
+    });
+  });
+  html+=`</div>`;
+
+  // Flagged activities
+  if(crit.length||risk.length){
+    html+=`<div class="report-section"><h5>⚠ Flagged Activities</h5>`;
+    [...crit,...risk].forEach(d=>{
+      html+=`<div style="padding:8px 12px;border-left:3px solid ${d.status==='Critical'?'var(--rust)':'var(--amber)'};margin-bottom:8px;background:var(--bg2)">
+        <strong style="font-size:12.5px">${d.activity}</strong>
+        <span class="badge ${d.stCls}" style="margin-left:8px">${d.status}</span>
+        <div style="font-family:var(--f-m);font-size:10px;color:var(--text-m);margin-top:3px">${d.year} ${d.quarter} · Proposed: ${d.proposed} · Achieved: ${d.achieved} (${d.pct.toFixed(0)}%)</div>
+        ${d.notes?`<div style="font-size:11.5px;color:var(--ink3);margin-top:3px">📝 ${d.notes}</div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  document.getElementById('reportBody').innerHTML=html;
+  document.getElementById('reportModal').classList.remove('off');
+}
+function closeReport(){document.getElementById('reportModal').classList.add('off');}
+function printReport(){
+  const body=document.getElementById('reportBody').innerHTML;
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FERTILE Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=Figtree:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Figtree',sans-serif;padding:32px;color:#1C1810;font-size:13px;line-height:1.6}
+    h1{font-family:'Fraunces',serif;font-size:26px;margin-bottom:4px}
+    h5{font-family:'Fraunces',serif;font-size:15px;margin-bottom:10px;color:#1C1810}
+    .mb{height:4px;background:#D8D2C4;border-radius:2px;display:inline-block}
+    .mbf{height:100%;border-radius:2px}
+    .report-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #D8D2C4}
+    .r-kpi{display:inline-block;background:#EDEAE2;padding:8px 14px;margin:4px;border-radius:3px;font-family:'Space Mono',monospace;font-size:10.5px}
+    .r-kpi strong{display:block;font-size:14px;color:#1C1810}
+    .narrative-box{padding:16px 18px;border-left:4px solid #2E5E3E;margin:10px 0;background:#F5F3EE;font-size:13px;line-height:1.75}
+    .badge{padding:2px 8px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;border-radius:2px}
+    .b-on{background:rgba(46,94,62,.12);color:#2E5E3E}.b-risk{background:rgba(181,117,30,.12);color:#B5751E}
+    .b-crit{background:rgba(168,48,48,.1);color:#A83030}.b-none{background:#EDEAE2;color:#8A7E6E}
+    @media print{body{padding:16px}}
+  </style></head><body>
+  <h1>FERTILE · M&E Progress Report</h1>
+  <p style="font-family:Space Mono,monospace;font-size:10px;color:#8A7E6E;margin-bottom:24px">SAFE × SBI Foundation · Begusarai, Bihar · Generated ${new Date().toLocaleDateString('en-IN')}</p>
+  ${body}
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(),600);
+}
+function downloadReportCSV(){
+  const cols=['Year','Quarter','Activity','Proposed','Achieved','Progress%','Status','Notes'];
+  let csv=cols.join(',')+'\n';
+  D.forEach(d=>{
+    csv+=`${d.year},${d.quarter},"${d.activity}",${d.proposed},${d.achieved},${d.pct.toFixed(1)},"${d.status}","${(d.notes||'').replace(/"/g,"'")}"\n`;
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='FERTILE_Report_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 7 — AUTOMATED NARRATIVE
+══════════════════════════════════════════════════ */
+function buildNarrative(){
+  const box=document.getElementById('narrativeBox');
+  const txt=document.getElementById('narrativeTxt');
+  if(!D.length){box.style.display='none';return;}
+  box.style.display='block';
+  document.getElementById('narrativeTs').textContent='Updated: '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const S=(fn)=>D.reduce((s,d)=>s+fn(d),0);
+  const tP=S(d=>d.proposed),tA=S(d=>d.achieved);
+  const pct=tP>0?(tA/tP*100):0;
+  const crit=D.filter(d=>d.status==='Critical');
+  const risk=D.filter(d=>d.status==='At Risk');
+  const onT=D.filter(d=>d.status==='On Track');
+  const notS=D.filter(d=>d.status==='Not Started');
+  // by quarter
+  const qNarr=[];
+  QS.forEach(q=>{
+    const[y,qn]=q.split('Q');
+    const qd=D.filter(d=>d.year===y&&d.quarter==='Q'+qn&&d.proposed>0);
+    if(!qd.length) return;
+    const qp=qd.reduce((s,d)=>s+d.proposed,0);
+    const qa=qd.reduce((s,d)=>s+d.achieved,0);
+    const qpct=qp>0?(qa/qp*100):0;
+    if(qd.some(d=>d.achieved>0)&&qpct<80){
+      const gap=(100-qpct).toFixed(0);
+      const cls=qpct<40?'nar-warn':'nar-amb';
+      qNarr.push(`<span class="nar-tag ${cls}">${y} ${qn}</span> is <strong>${gap}% behind target</strong>`);
+    }
+  });
+  // capacity building
+  const cbRows=D.filter(d=>d.activity.toLowerCase().includes('capacity')&&d.proposed>0);
+  const cbP=cbRows.reduce((s,d)=>s+d.proposed,0);
+  const cbA=cbRows.reduce((s,d)=>s+d.achieved,0);
+  const cbPct=cbP>0?(cbA/cbP*100):0;
+  const cbNote=cbPct<80&&cbA>0?` Capacity Building is currently at <span class="nar-tag nar-amb">${cbPct.toFixed(0)}% of target</span>.`:'';
+  // beneficiaries
+  const dA=S(d=>d.dBA); const wA=S(d=>d.wBA);
+  const wPct=dA>0?Math.round(wA/dA*100):0;
+  const wNote=dA>0?` Women constitute <span class="nar-tag ${wPct>=50?'nar-ok':'nar-amb'}">${wPct}%</span> of direct beneficiaries.`:'';
+  // villages
+  const vs=new Set(D.filter(d=>d.achieved>0).map(d=>d.village).filter(Boolean)).size;
+  const parts=[];
+  const overall=`As of the last update, the project has completed <strong>${pct.toFixed(1)}%</strong> of planned activities across all quarters.`;
+  if(onT.length) parts.push(`<span class="nar-tag nar-ok">${onT.length} activities</span> are on track`);
+  if(risk.length) parts.push(`<span class="nar-tag nar-amb">${risk.length}</span> at risk`);
+  if(crit.length) parts.push(`<span class="nar-tag nar-warn">${crit.length} critical</span>`);
+  if(notS.length) parts.push(`${notS.length} not yet started`);
+  const statusLine=parts.length?` Activity status: ${parts.join(', ')}.`:'';
+  const qLine=qNarr.length?' Quarter highlights: '+qNarr.join('; ')+'.'  :'';
+  const vilLine=vs>0?` Field activities are active in <strong>${vs} village${vs>1?'s':''}</strong>.`:'';
+  txt.innerHTML=overall+statusLine+cbNote+wNote+qLine+vilLine;
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 8 — RISK HEATMAP
+══════════════════════════════════════════════════ */
+function drawRiskHeatmap(){
+  // classify each flagged activity into 2×2 quadrant
+  const impactScore=(d)=>{
+    const a=d.activity.toLowerCase();
+    if(a.includes('agroforestry')||a.includes('float')||a.includes('agro processing')||a.includes('fpo')) return 'high';
+    if(a.includes('natural farm')||a.includes('seed')||a.includes('capacity')||a.includes('pgs')) return 'high';
+    return 'low';
+  };
+  const probScore=(d)=>{
+    if(d.status==='Critical') return 'high';
+    if(d.status==='At Risk')  return 'high';
+    if(d.status==='Not Started'&&d.startM<=6) return 'high'; // overdue not-started
+    return 'low';
+  };
+  const cells={'hi-hi':[],'lo-hi':[],'hi-lo':[],'lo-lo':[]};
+  D.filter(d=>d.status!=='On Track').forEach(d=>{
+    const imp=impactScore(d), prob=probScore(d);
+    const key=`${imp==='high'?'hi':'lo'}-${prob==='high'?'hi':'lo'}`;
+    cells[key].push(d);
+  });
+  Object.entries(cells).forEach(([key,acts])=>{
+    const el=document.getElementById('hm-'+key);
+    if(!el) return;
+    const existing=[...el.querySelectorAll('.hm-item')];
+    existing.forEach(e=>e.remove());
+    acts.slice(0,8).forEach(d=>{
+      const div=document.createElement('div');
+      div.className='hm-item';
+      div.innerHTML=`<span class="badge ${d.stCls}" style="margin-bottom:2px">${d.status}</span><br>${d.activity.length>42?d.activity.slice(0,42)+'…':d.activity}<br><span style="font-family:var(--f-m);font-size:9px;color:var(--text-m)">${d.year} ${d.quarter}</span>`;
+      div.style.cursor='pointer';
+      div.onclick=()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+        document.getElementById('tab-ac').classList.add('active');
+        document.querySelector('.tab-btn[onclick*="ac"]').classList.add('active');
+        document.getElementById('fSt').value=d.status;
+        filterActs();
+      };
+      el.appendChild(div);
+    });
+    if(!acts.length){
+      const div=document.createElement('div');
+      div.style.cssText='font-family:var(--f-m);font-size:10px;color:var(--text-m);font-style:italic;padding:8px';
+      div.textContent='No activities';
+      el.appendChild(div);
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 9 — GANTT DEPENDENCY LINES (toggle)
+══════════════════════════════════════════════════ */
+// Dependencies: [predecessor activity keyword, successor activity keyword]
+const DEPS=[
+  ['baseline','capacity'],['baseline','fpo'],['baseline','agroforestry'],
+  ['baseline','float'],['baseline','natural farm'],
+  ['fpo establishment','ceo'],['agro processing','seed conservation'],
+  ['pgs','fpo'],['inception workshop','capacity'],
+];
+function getDepLines(uniq){
+  const lines=[];
+  DEPS.forEach(([pred,succ])=>{
+    const pIdx=uniq.findIndex(d=>d.activity.toLowerCase().includes(pred));
+    const sIdx=uniq.findIndex(d=>d.activity.toLowerCase().includes(succ));
+    if(pIdx<0||sIdx<0) return;
+    const pEnd=Math.min(uniq[pIdx].startM-1+uniq[pIdx].duration,36);
+    const sStart=uniq[sIdx].startM-1;
+    lines.push({from:{row:pIdx,col:pEnd},to:{row:sIdx,col:sStart}});
+  });
+  return lines;
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 10 — GOOGLE SHEETS SYNC
+══════════════════════════════════════════════════ */
+async function loadGoogleSheet(){
+  const url=(document.getElementById('gsUrl')||{value:''}).value.trim();
+  if(!url){showAlert('err','Paste a published Google Sheets CSV URL first.');return;}
+  const st=document.getElementById('gsStatus');
+  if(st){st.textContent='Fetching…';st.className='gs-status';}
+  try{
+    // Use cors-anywhere proxy for cross-origin (user needs to allow it once)
+    // Better: use allorigins.win as a reliable CORS proxy for static sites
+    const proxy='https://api.allorigins.win/raw?url=';
+    const res=await fetch(proxy+encodeURIComponent(url));
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const text=await res.text();
+    const rows=parseCSV(text);
+    if(!rows.length) throw new Error('No rows parsed');
+    if(st){st.textContent='✅ Connected — '+rows.length+' rows loaded';st.className='gs-status ok';}
+    document.getElementById('spin').style.display='block';
+    document.getElementById('welcome').style.display='none';
+    process(rows);
+  }catch(e){
+    if(st){st.textContent='❌ Error: '+e.message+' — Check sheet is published to web as CSV';st.className='gs-status err';}
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   EXPORT CSV (Feature 1)
+══════════════════════════════════════════════════ */
+function exportCSV(){
+  if(!D.length){showAlert('err','No data to export.');return;}
+  // Rebuild full CSV with edited values
+  const subCols=[];
+  for(let i=1;i<=12;i++){subCols.push(`Sub_Activity_${i}`,`Sub_Activity_${i}_Responsibility`);}
+  const metCols=['Proposed_Quantity','Unit','Achieved_Quantity','Village','Block','Latitude','Longitude',
+    'Direct_Beneficiaries_Proposed','Direct_Beneficiaries_Achieved','Women_Beneficiaries_Proposed','Women_Beneficiaries_Achieved',
+    'Indirect_Beneficiaries_Proposed','Indirect_Beneficiaries_Achieved',
+    'Avg_Baseline_Income_INR','Avg_Current_Income_INR','Income_Increase_Pct_Proposed','Income_Increase_Pct_Achieved',
+    'Households_With_Income_Data','Community_Awareness_Sessions_Proposed','Community_Awareness_Sessions_Achieved',
+    'Capacity_Building_Sessions_Proposed','Capacity_Building_Sessions_Achieved',
+    'Farmers_Trained_Proposed','Farmers_Trained_Achieved','FPO_Members_Proposed','FPO_Members_Achieved',
+    'APU_Operational','APU_Products_Processed_Kg','Seed_Center_Operational','Seed_Varieties_Conserved','FFS_Sessions_Conducted',
+    'Float_Farm_Units_Proposed','Float_Farm_Units_Achieved','Agroforestry_Ha_Proposed','Agroforestry_Ha_Achieved',
+    'INF_Ha_Proposed','INF_Ha_Achieved','Photos_Collected','Videos_Collected','Notes','Status'];
+  const headers=['Year','Quarter','Activity',...subCols,...metCols];
+  const esc=v=>'"'+(v||'').toString().replace(/"/g,'""')+'"';
+  let csv=headers.join(',')+'\n';
+  D.forEach(d=>{
+    const row=[d.year,d.quarter,esc(d.activity)];
+    for(let i=0;i<12;i++){row.push(esc(d.subs[i]||''),esc(d.resps[i]||''));}
+    row.push(
+      d.proposed, esc(d.unit), d.achieved,
+      esc(d.village||''),esc(d.block||''),'','',
+      d.dBP,d.dBA,d.wBP||0,d.wBA,d.iBP,d.iBA,
+      d.baseInc,d.curInc,d.incPctP,d.incPctA,d.hhInc,
+      d.awP,d.awA,d.cbP,d.cbA,d.trP,d.trA,
+      d.fMP,d.fMA,d.apuOp,d.apuKg,d.seedOp,d.seedV,d.ffsS,
+      d.ffP,d.ffA,d.afP,d.afA,d.infP,d.infA,
+      d.photos?'Yes':'No',d.videos?'Yes':'No',
+      esc(d.notes||''),esc(d.status)
+    );
+    csv+=row.join(',')+'\n';
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='FERTILE_Project_Data_updated_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showAlert('ok','CSV exported with all edits.');
+}
 function tHead(cols){return `<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;}
 function lOpts(o){return Object.assign({backgroundColor:'transparent'},o);}
 function showAlert(t,m){
